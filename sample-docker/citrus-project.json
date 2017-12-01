@@ -1,0 +1,29 @@
+{
+  "projectHome" : "/Users/christoph/Projekte/Citrus/citrus-samples/sample-docker",
+  "name" : "citrus-sample-docker",
+  "description" : "",
+  "version" : "2.7.3-SNAPSHOT",
+  "settings" : {
+    "basePackage" : "com.consol.citrus.samples",
+    "citrusVersion" : "2.7.3-SNAPSHOT",
+    "springApplicationContext" : "classpath*:citrus-context.xml",
+    "springJavaConfig" : "com.consol.citrus.CitrusEndpointConfig",
+    "javaSrcDirectory" : "src/test/java/",
+    "xmlSrcDirectory" : "src/test/resources/",
+    "javaFilePattern" : "/**/*Test.java,/**/*IT.java",
+    "xmlFilePattern" : "/**/*Test.xml,/**/*IT.xml",
+    "useConnector" : true,
+    "connectorActive" : false,
+    "tabSize" : 2,
+    "build" : {
+      "@class" : "com.consol.citrus.admin.service.command.maven.MavenBuildContext",
+      "type" : "maven",
+      "properties" : [ ],
+      "command" : null,
+      "clean" : false,
+      "compile" : true,
+      "testPlugin" : "maven-failsafe",
+      "profiles" : null
+    }
+  }
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>com.consol.citrus.samples</groupId>
+  <artifactId>citrus-samples</artifactId>
+  <version>2.7.3-SNAPSHOT</version>
+  <name>citrus-samples</name>
+  <packaging>pom</packaging>
+  
+  <modules>
+    <module>sample-bakery</module>
+    <module>sample-javaee</module>
+    <module>sample-flightbooking</module>
+    <module>sample-greeting</module>
+    <module>sample-bookstore</module>
+    <module>sample-incident</module>
+    <module>sample-camel-context</module>
+    <module>sample-dictionaries</module>
+    <module>sample-message-store</module>
+    <module>sample-docker</module>
+    <module>sample-kubernetes</module>
+    <module>sample-cucumber</module>
+    <module>sample-cucumber-spring</module>
+    <module>sample-cucumber-spring2</module>
+    <module>sample-mail</module>
+    <module>sample-testng</module>
+    <module>sample-junit</module>
+    <module>sample-junit5</module>
+    <module>sample-http</module>
+    <module>sample-http-loadtest</module>
+    <module>sample-http-static-response</module>
+    <module>sample-http-basic-auth</module>
+    <module>sample-https</module>
+    <module>sample-rmi</module>
+    <module>sample-dataprovider</module>
+    <module>sample-reporting</module>
+    <module>sample-xhtml</module>
+    <module>sample-xml</module>
+    <module>sample-json</module>
+    <module>sample-hamcrest</module>
+    <module>sample-jms</module>
+    <module>sample-dynamic-endpoints</module>
+    <module>sample-binary</module>
+    <module>sample-soap</module>
+    <module>sample-soap-attachment</module>
+    <module>sample-soap-wssecurity</module>
+    <module>sample-soap-wsaddressing</module>
+    <module>sample-soap-ssl</module>
+    <module>sample-soap-static-response</module>
+    <module>sample-jdbc</module>
+  </modules>
+  
+  <repositories>
+    <repository>
+      <id>consol-labs-snapshots</id>
+      <url>http://labs.consol.de/maven/snapshots-repository/</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>interval:10080</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>consol-labs-snapshots</id>
+      <url>http://labs.consol.de/maven/snapshots-repository/</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>interval:10080</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+</project>
