@@ -23,9 +23,6 @@ system under test. Please find following list of samples and their primary objec
 | [sample-docker](sample-docker)| Shows how to use Citrus within Docker infrastructure |
 | [sample-kubernetes](sample-kubernetes)| Shows how to use Citrus within Kubernetes infrastructure |
 | [sample-gradle](sample-gradle)| Uses Gradle build to execute tests |
-| [sample-annotation-config](sample-annotation-config)| Uses annotation based endpoint configuration |
-| [sample-javaconfig](sample-javaconfig)| Uses pure Java POJOs for configuration |
-| [sample-behaviors](sample-behaviors)| Shows how to reuse test actions in test behaviors |
 | [sample-dictionaries](sample-dictionaries)| Shows how to incorporate message manipulation using data dictionaries |
 | [sample-message-store](sample-message-store)| Shows how to access internal message store |
 | [sample-jdbc](sample-jdbc)| Validates stored data in relational database |
@@ -33,9 +30,7 @@ system under test. Please find following list of samples and their primary objec
 | [sample-json](sample-json)| Shows Json payload validation feature with JsonPath validation |
 | [sample-hamcrest](sample-hamcrest)| Shows Hamcrest matcher support in validation and conditions |
 | [sample-xml](sample-xml)| Shows XML validation feature with schema and Xpath validation |
-| [sample-oxm](sample-oxm)| Shows XML object marshalling feature when sending and receiving messages |
 | [sample-mail](sample-mail)| Shows mail server activities in Citrus |
-| [sample-databind](sample-databind)| Shows JSON object mapping feature when sending and receiving messages |
 | [sample-dataprovider](sample-dataprovider)| Shows TestNG data provider usage in Citrus |
 | [sample-dynamic-endpoints](sample-dynamic-endpoints)| Shows dynamic endpoint component usage |
 | [sample-testng](sample-testng)| Shows TestNG framework support |
