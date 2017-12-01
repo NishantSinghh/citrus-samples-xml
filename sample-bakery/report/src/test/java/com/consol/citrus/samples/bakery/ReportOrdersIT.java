@@ -16,166 +16,23 @@
 
 package com.consol.citrus.samples.bakery;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.context.TestContext;
-import com.consol.citrus.dsl.functions.Functions;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.message.MessageType;
-import com.consol.citrus.validation.callback.AbstractValidationCallback;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.testng.Assert;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
-
-import java.util.Map;
 
 /**
  * @author Christoph Deppisch
  * @since 2.4
  */
 @Test
-public class ReportOrdersIT extends TestNGCitrusTestDesigner {
+public class ReportOrdersIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("reportingClient")
-    private HttpClient reportingClient;
+    @CitrusXmlTest(name = "ReportGetOrdersIT")
+    public void getOrders() {}
 
-    @CitrusTest
-    public void getOrders() {
-        final String orderId = Functions.randomNumber(10L, null);
-        variable("orderId", orderId);
+    @CitrusXmlTest(name = "ReportAddOrdersIT")
+    public void addOrders() {}
 
-        echo("First check order id not present");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/orders");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT)
-                .validationCallback(new AbstractValidationCallback<String>() {
-                    @Override
-                    public void validate(String payload, Map headers, TestContext context) {
-                        Assert.assertFalse(payload.contains(orderId));
-                    }
-                });
-
-        echo("Add some 'blueberry' order with id");
-
-        http().client(reportingClient)
-                .send()
-                .put("/reporting")
-                .queryParam("id", "${orderId}")
-                .queryParam("name", "blueberry")
-                .queryParam("amount", "1");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK);
-
-        echo("Receive order id in list of produced goods");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/orders");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT)
-                .validationCallback(new AbstractValidationCallback<String>() {
-                    @Override
-                    public void validate(String payload, Map headers, TestContext context) {
-                        Assert.assertTrue(payload.contains(orderId));
-                    }
-                });
-    }
-
-    @CitrusTest
-    public void addOrders() {
-        echo("First receive report and save current amount of produced chocolate cookies to variable");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/json");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.JSON)
-                .payload("{\"caramel\": \"@ignore@\",\"blueberry\": \"@ignore@\",\"chocolate\": \"@variable('producedCookies')@\"}");
-
-        echo("Add some 'chocolate' orders");
-
-        http().client(reportingClient)
-                .send()
-                .put("/reporting")
-                .queryParam("id", "citrus:randomNumber(10)")
-                .queryParam("name", "chocolate")
-                .queryParam("amount", "10");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK);
-
-        echo("Receive report with changed data");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/json");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.JSON)
-                .payload("{\"caramel\": \"@ignore@\",\"blueberry\": \"@ignore@\",\"chocolate\": \"@greaterThan(${producedCookies})@\"}");
-    }
-
-    @CitrusTest
-    public void getOrderStatus() {
-        variable("orderId", Functions.randomNumber(10L, null));
-
-        echo("First receive negative order status");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/order")
-                .queryParam("id", "${orderId}");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.JSON)
-                .payload("{\"status\": false}");
-
-        echo("Add some 'caramel' order with id");
-
-        http().client(reportingClient)
-                .send()
-                .put("/reporting")
-                .queryParam("id", "${orderId}")
-                .queryParam("name", "caramel")
-                .queryParam("amount", "1");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK);
-
-        echo("Receive report positive status for order id");
-
-        http().client(reportingClient)
-                .send()
-                .get("/reporting/order")
-                .queryParam("id", "${orderId}");
-
-        http().client(reportingClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.JSON)
-                .payload("{\"status\": true}");
-    }
+    @CitrusXmlTest(name = "ReportOrderStatusIT")
+    public void getOrderStatus() {}
 }

@@ -16,16 +16,8 @@
 
 package com.consol.citrus.samples.bakery;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.mail.message.CitrusMailMessageHeaders;
-import com.consol.citrus.mail.server.MailServer;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
@@ -33,54 +25,8 @@ import org.testng.annotations.Test;
  * @since 2.4
  */
 @Test
-public class ReportOrderMailIT extends TestNGCitrusTestDesigner {
+public class ReportOrderMailIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("reportingClient")
-    private HttpClient reportingClient;
-
-    @Autowired
-    @Qualifier("mailServer")
-    private MailServer mailServer;
-
-     @CitrusTest
-    public void shouldSendMail() {
-         echo("Add 1000+ order and receive mail");
-
-         variable("orderType", "chocolate");
-
-         http().client(reportingClient)
-                 .send()
-                 .put("/reporting")
-                 .queryParam("id", "citrus:randomNumber(10)")
-                 .queryParam("name", "${orderType}")
-                 .queryParam("amount", "1001");
-
-         http().client(reportingClient)
-                 .receive()
-                 .response(HttpStatus.OK);
-
-         echo("Receive report mail for 1000+ order");
-
-         receive(mailServer)
-                 .payload(new ClassPathResource("templates/mail.xml"))
-                 .header(CitrusMailMessageHeaders.MAIL_SUBJECT, "Congratulations!")
-                 .header(CitrusMailMessageHeaders.MAIL_FROM, "cookie-report@example.com")
-                 .header(CitrusMailMessageHeaders.MAIL_TO, "stakeholders@example.com");
-
-         send(mailServer)
-                 .payload(new ClassPathResource("templates/mail_response.xml"));
-
-         echo("Receive report with 1000+ order");
-
-         http().client(reportingClient)
-                 .send()
-                 .get("/reporting/json");
-
-         http().client(reportingClient)
-                 .receive()
-                 .response(HttpStatus.OK)
-                 .messageType(MessageType.JSON)
-                 .payload("{\"caramel\": \"@ignore@\",\"blueberry\": \"@ignore@\",\"chocolate\": \"@greaterThan(1000)@\"}");
-     }
+    @CitrusXmlTest(name = "ReportOrderMailIT")
+    public void shouldSendMail() {}
 }

@@ -16,14 +16,8 @@
 
 package com.consol.citrus.samples.bakery;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.jms.endpoint.JmsEndpoint;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
@@ -31,82 +25,11 @@ import org.testng.annotations.Test;
  * @since 2.4
  */
 @Test
-public class RouteMessagesHttpIT extends TestNGCitrusTestDesigner {
+public class RouteMessagesHttpIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("bakeryClient")
-    private HttpClient bakeryClient;
+    @CitrusXmlTest(name = "RouteMessagesHttpIT")
+    public void routeMessagesContentBased() {}
 
-    @Autowired
-    @Qualifier("workerChocolateEndpoint")
-    private JmsEndpoint workerChocolateEndpoint;
-
-    @Autowired
-    @Qualifier("workerCaramelEndpoint")
-    private JmsEndpoint workerCaramelEndpoint;
-
-    @Autowired
-    @Qualifier("workerBlueberryEndpoint")
-    private JmsEndpoint workerBlueberryEndpoint;
-
-    @CitrusTest
-    public void routeMessagesContentBased() {
-        http().client(bakeryClient)
-                .send()
-                .post("/order")
-                .contentType("application/json")
-                .payload("{ \"order\": { \"type\": \"chocolate\", \"id\": citrus:randomNumber(10), \"amount\": 1}}");
-
-        http().client(bakeryClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT);
-
-        receive(workerChocolateEndpoint)
-                .payload("<order><type>chocolate</type><id>@ignore@</id><amount>1</amount></order>");
-
-        http().client(bakeryClient)
-                .send()
-                .post("/order")
-                .contentType("application/json")
-                .payload("{ \"order\": { \"type\": \"caramel\", \"id\": citrus:randomNumber(10), \"amount\": 1}}");
-
-        http().client(bakeryClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT);
-
-        receive(workerCaramelEndpoint)
-                .payload("<order><type>caramel</type><id>@ignore@</id><amount>1</amount></order>");
-
-        http().client(bakeryClient)
-                .send()
-                .post("/order")
-                .contentType("application/json")
-                .payload("{ \"order\": { \"type\": \"blueberry\", \"id\": citrus:randomNumber(10), \"amount\": 1}}");
-
-        http().client(bakeryClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT);
-
-        receive(workerBlueberryEndpoint)
-                .payload("<order><type>blueberry</type><id>@ignore@</id><amount>1</amount></order>");
-    }
-
-    @CitrusTest
-    public void routeUnknownOrderType() {
-        http().client(bakeryClient)
-                .send()
-                .post("/order")
-                .payload("{ \"order\": { \"type\": \"brownie\", \"id\": citrus:randomNumber(10), \"amount\": 1}}");
-
-        http().client(bakeryClient)
-                .receive()
-                .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT);
-
-        receive("jms:factory.unknown.inbound")
-                .payload("<order><type>brownie</type><id>@ignore@</id><amount>1</amount></order>");
-    }
+    @CitrusXmlTest(name = "RouteUnknownMessagesHttpIT")
+    public void routeUnknownOrderType() {}
 }

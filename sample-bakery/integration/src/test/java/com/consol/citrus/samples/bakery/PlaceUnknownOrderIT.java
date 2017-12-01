@@ -16,11 +16,8 @@
 
 package com.consol.citrus.samples.bakery;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.jms.endpoint.JmsEndpoint;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
@@ -28,22 +25,8 @@ import org.testng.annotations.Test;
  * @since 2.4
  */
 @Test
-public class PlaceUnknownOrderIT extends TestNGCitrusTestDesigner {
+public class PlaceUnknownOrderIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("bakeryOrderEndpoint")
-    private JmsEndpoint bakeryOrderEndpoint;
-
-    @Autowired
-    @Qualifier("unknownOrderEndpoint")
-    private JmsEndpoint unknownOrderEndpoint;
-
-    @CitrusTest
-    public void placeUnknownOrderType() {
-        send(bakeryOrderEndpoint)
-            .payload("<order><type>brownie</type><id>999</id><amount>1</amount></order>");
-
-        receive(unknownOrderEndpoint)
-            .payload("<order><type>brownie</type><id>999</id><amount>1</amount></order>");
-    }
+    @CitrusXmlTest(name = "PlaceUnknownOrderIT")
+    public void placeUnknownOrderType() {}
 }

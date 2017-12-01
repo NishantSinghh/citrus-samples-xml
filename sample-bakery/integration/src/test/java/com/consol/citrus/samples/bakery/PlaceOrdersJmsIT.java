@@ -16,17 +16,8 @@
 
 package com.consol.citrus.samples.bakery;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.container.IteratingConditionExpression;
-import com.consol.citrus.context.TestContext;
-import com.consol.citrus.dsl.functions.Functions;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.jms.endpoint.JmsEndpoint;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
@@ -34,94 +25,14 @@ import org.testng.annotations.Test;
  * @since 2.4
  */
 @Test
-public class PlaceOrdersJmsIT extends TestNGCitrusTestDesigner {
+public class PlaceOrdersJmsIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("bakeryOrderEndpoint")
-    private JmsEndpoint bakeryOrderEndpoint;
+    @CitrusXmlTest(name = "PlaceChocolateJmsOrderIT")
+    public void placeChocolateCookieOrder() {}
 
-    @Autowired
-    @Qualifier("reportingClient")
-    private HttpClient reportingClient;
+    @CitrusXmlTest(name = "PlaceCaramelJmsOrderIT")
+    public void placeCaramelCookieOrder() {}
 
-    @CitrusTest
-    public void placeChocolateCookieOrder() {
-        variable("orderId", Functions.randomNumber(10L, null));
-
-        send(bakeryOrderEndpoint)
-            .payload("<order><type>chocolate</type><id>${orderId}</id><amount>1</amount></order>");
-
-        repeatOnError()
-            .until(new IteratingConditionExpression() {
-                @Override
-                public boolean evaluate(int index, TestContext context) {
-                    return index > 20;
-                }
-            })
-            .autoSleep(100L)
-            .actions(http().client(reportingClient)
-                            .send()
-                            .get("/reporting/order")
-                            .queryParam("id", "${orderId}"),
-                    http().client(reportingClient)
-                            .receive()
-                            .response(HttpStatus.OK)
-                            .messageType(MessageType.JSON)
-                            .payload("{\"status\": true}")
-            );
-    }
-
-    @CitrusTest
-    public void placeCaramelCookieOrder() {
-        variable("orderId", Functions.randomNumber(10L, null));
-
-        send(bakeryOrderEndpoint)
-                .payload("<order><type>caramel</type><id>${orderId}</id><amount>1</amount></order>");
-
-        repeatOnError()
-            .until(new IteratingConditionExpression() {
-                @Override
-                public boolean evaluate(int index, TestContext context) {
-                    return index > 20;
-                }
-            })
-            .autoSleep(100L)
-            .actions(http().client(reportingClient)
-                            .send()
-                            .get("/reporting/order")
-                            .queryParam("id", "${orderId}"),
-                    http().client(reportingClient)
-                            .receive()
-                            .response(HttpStatus.OK)
-                            .messageType(MessageType.JSON)
-                            .payload("{\"status\": true}")
-            );
-    }
-
-    @CitrusTest
-    public void placeBlueberryCookieOrder() {
-        variable("orderId", Functions.randomNumber(10L, null));
-
-        send(bakeryOrderEndpoint)
-                .payload("<order><type>blueberry</type><id>${orderId}</id><amount>1</amount></order>");
-
-        repeatOnError()
-            .until(new IteratingConditionExpression() {
-                @Override
-                public boolean evaluate(int index, TestContext context) {
-                    return index > 20;
-                }
-            })
-            .autoSleep(100L)
-            .actions(http().client(reportingClient)
-                            .send()
-                            .get("/reporting/order")
-                            .queryParam("id", "${orderId}"),
-                    http().client(reportingClient)
-                            .receive()
-                            .response(HttpStatus.OK)
-                            .messageType(MessageType.JSON)
-                            .payload("{\"status\": true}")
-            );
-    }
+    @CitrusXmlTest(name = "PlaceBlueberryJmsOrderIT")
+    public void placeBlueberryCookieOrder() {}
 }
