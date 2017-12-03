@@ -16,84 +16,21 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.context.TestContext;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.jms.endpoint.JmsEndpoint;
-import com.consol.citrus.message.Message;
-import com.consol.citrus.message.MessageType;
-import com.consol.citrus.validation.AbstractMessageValidator;
-import com.consol.citrus.validation.context.DefaultValidationContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private JmsEndpoint todoJmsEndpoint;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testAddTodoEntryBinaryBase64() {
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        send(todoJmsEndpoint)
-                .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-                .messageType(MessageType.BINARY)
-                .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        receive(todoJmsEndpoint)
-                .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-                .messageType(MessageType.BINARY_BASE64)
-                .payload("citrus:encodeBase64('{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}')");
-    }
+    @CitrusXmlTest(name = "TodoList_Binary_IT")
+    public void testAddTodoEntryBinaryBase64() {}
 
     @Test
-    @CitrusTest
-    public void testAddTodoEntryBinary() {
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        send(todoJmsEndpoint)
-            .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-            .messageType(MessageType.BINARY)
-            .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        receive(todoJmsEndpoint)
-            .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-            .messageType(MessageType.BINARY)
-            .validator(new BinaryMessageValidator())
-            .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
-
-    /**
-     * Validates binary message content.
-     */
-    private class BinaryMessageValidator extends AbstractMessageValidator<DefaultValidationContext> {
-
-        @Override
-        public void validateMessage(Message receivedMessage, Message controlMessage,
-                                    TestContext context, DefaultValidationContext validationContext) {
-            Assert.isTrue(new String(receivedMessage.getPayload(byte[].class))
-                    .equals(new String(controlMessage.getPayload(byte[].class))), "Binary message validation failed!");
-        }
-
-        @Override
-        public boolean supportsMessageType(String messageType, Message message) {
-            return messageType.equalsIgnoreCase(MessageType.BINARY.name());
-        }
-
-        @Override
-        protected Class getRequiredValidationContextType() {
-            return DefaultValidationContext.class;
-        }
-    }
+    @CitrusXmlTest(name = "TodoList_BinaryBase64_IT")
+    public void testAddTodoEntryBinary() {}
 
 }
