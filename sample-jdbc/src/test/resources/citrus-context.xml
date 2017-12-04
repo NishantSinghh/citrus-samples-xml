@@ -14,12 +14,12 @@
       <citrus:namespace prefix="xh" uri="http://www.w3.org/1999/xhtml"/>
     </citrus:namespace-context>
 
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
 
     <citrus:before-suite id="createDatabase">
       <citrus:actions>
-        <citrus-test:sql datasource="todoListDataSource">
+        <citrus-test:sql datasource="todoDataSource">
           <citrus-test:statement>CREATE TABLE todo_entries (id VARCHAR(50), title VARCHAR(255), description VARCHAR(255), done BOOLEAN)</citrus-test:statement>
         </citrus-test:sql>
       </citrus:actions>
@@ -27,7 +27,7 @@
 
     <citrus:after-suite id="cleanUpDatabase">
       <citrus:actions>
-        <citrus-test:sql datasource="todoListDataSource">
+        <citrus-test:sql datasource="todoDataSource">
           <citrus-test:statement>DELETE FROM todo_entries</citrus-test:statement>
         </citrus-test:sql>
       </citrus:actions>
@@ -50,7 +50,7 @@
     </bean>
 
     <!-- JDBC data source -->
-    <bean id="todoListDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <bean id="todoDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
       <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
       <property name="url" value="jdbc:hsqldb:hsql://localhost/testdb"/>
       <property name="username" value="sa"/>

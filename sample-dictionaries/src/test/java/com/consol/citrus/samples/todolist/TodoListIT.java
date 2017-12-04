@@ -16,142 +16,25 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.message.MessageType;
-import com.consol.citrus.variable.dictionary.DataDictionary;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private HttpClient todoClient;
-
-    @Autowired
-    @Qualifier("inboundDictionary")
-    private DataDictionary inboundDictionary;
-
-    @Autowired
-    @Qualifier("outboundDictionary")
-    private DataDictionary outboundDictionary;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testJsonPayloadValidation() {
-        variable("todoId", "citrus:randomUUID()");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .dictionary(outboundDictionary)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": null, \"description\": null, \"done\": null}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .dictionary(inboundDictionary)
-            .payload("{ \"id\": \"${todoId}\", \"title\": null, \"description\": null, \"done\": null}");
-    }
+    @CitrusXmlTest(name = "TodoList_Payload_IT")
+    public void testJsonPayloadValidation() {}
 
     @Test
-    @CitrusTest
-    public void testJsonValidationWithFileResource() {
-        variable("todoId", "citrus:randomUUID()");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .dictionary(outboundDictionary)
-            .contentType("application/json")
-            .payload(new ClassPathResource("templates/todo.json"));
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .dictionary(inboundDictionary)
-            .payload(new ClassPathResource("templates/todo.json"));
-    }
+    @CitrusXmlTest(name = "TodoList_Resource_IT")
+    public void testJsonValidationWithFileResource() {}
 
     @Test
-    @CitrusTest
-    public void testJsonPathValidation() {
-        variable("todoId", "citrus:randomUUID()");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .dictionary(outboundDictionary)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": null, \"description\": null, \"done\": null}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .dictionary(inboundDictionary)
-            .validate("$.id", "${todoId}")
-            .validate("$.title", "todo_${todoId}")
-            .validate("$.description", "@endsWith('todo_${todoId}')@")
-            .validate("$.done", false);
-    }
+    @CitrusXmlTest(name = "TodoList_JsonPath_IT")
+    public void testJsonPathValidation() {}
 
 }

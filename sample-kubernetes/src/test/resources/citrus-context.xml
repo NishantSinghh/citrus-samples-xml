@@ -17,7 +17,7 @@
                        namespace="default"
                        url="https://kubernetes:443/"/>
 
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://citrus-sample-todo-service:8080"/>
 
 </beans>

@@ -25,7 +25,7 @@
 
     <!-- WSAddressing enabled SOAP client -->
 
-    <citrus-ws:client id="todoListClient"
+    <citrus-ws:client id="todoClient"
                       request-url="http://localhost:8080/services/ws/todolist"
                       message-converter="wsAddressingMessageConverter"/>
 
@@ -56,7 +56,7 @@
 
     <!-- WSAddressing enabled SOAP server -->
 
-    <citrus-ws:server id="todoListServer"
+    <citrus-ws:server id="todoServer"
                       port="8080"
                       auto-start="true"
                       interceptors="serverInterceptors"/>

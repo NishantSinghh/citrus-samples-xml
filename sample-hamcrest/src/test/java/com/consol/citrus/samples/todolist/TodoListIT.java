@@ -16,98 +16,22 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
 import com.consol.citrus.annotations.CitrusXmlTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
-
-import java.util.UUID;
-
-import static org.hamcrest.Matchers.*;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private HttpClient todoClient;
-
-    @Test
-    @CitrusTest
-    public void testHamcrestValidation() {
-        String todoId = UUID.randomUUID().toString();
-
-        variable("todoId", todoId);
-        variable("todoName", "todo_${todoId}");
-        variable("todoDescription", "Description: ${todoName}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": false}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .validate("$.keySet()", hasItems("id", "title", "description", "done"))
-            .validate("$.id", equalTo(todoId))
-            .validate("$.title", allOf(startsWith("todo_"), endsWith(todoId)))
-            .validate("$.description", anyOf(startsWith("Description:"), nullValue()))
-            .validate("$.done", not(true));
-    }
-
-    @Test
-    @CitrusTest
-    public void testHamcrestCondition() {
-        iterate()
-            .condition(lessThanOrEqualTo(5))
-            .actions(
-                createVariable("todoId", "citrus:randomUUID()"),
-                createVariable("todoName", "todo_${i}"),
-                createVariable("todoDescription", "Description: ${todoName}"),
-                http()
-                    .client(todoClient)
-                    .send()
-                    .post("/todolist")
-                    .messageType(MessageType.JSON)
-                    .contentType("application/json")
-                    .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": false}"),
-
-                http()
-                    .client(todoClient)
-                    .receive()
-                    .response(HttpStatus.OK)
-                    .messageType(MessageType.PLAINTEXT)
-                    .payload("${todoId}")
-        );
-    }
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
     @CitrusXmlTest(name = "TodoListIT")
-    void testXmlHamcrestSupport() {
+    void testTodoList() {
     }
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_HamcrestCondition_IT")
+    public void testHamcrestCondition() {}
 
 }

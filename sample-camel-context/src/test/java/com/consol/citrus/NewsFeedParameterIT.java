@@ -16,13 +16,9 @@
 
 package com.consol.citrus;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.jms.endpoint.JmsEndpoint;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import com.consol.citrus.testng.CitrusParameters;
-import com.consol.citrus.ws.message.SoapMessageHeaders;
-import com.consol.citrus.ws.server.WebServiceServer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -31,32 +27,12 @@ import org.testng.annotations.Test;
  * @since 2.1
  */
 @Test
-public class NewsFeedParameterIT extends TestNGCitrusTestDesigner {
+public class NewsFeedParameterIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    private JmsEndpoint newsJmsEndpoint;
-
-    @Autowired
-    private WebServiceServer newsSoapServer;
-
-    @CitrusTest(name = "NewsFeed_DataProvider_Ok_IT")
+    @CitrusXmlTest(name = "NewsFeed_DataProvider_Ok_IT")
     @CitrusParameters({ "message" })
     @Test(dataProvider = "messageDataProvider")
-    public void newsFeed_DataProvider_Ok_Test(String message) {
-        send(newsJmsEndpoint)
-                .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                            "<nf:Message>${message}</nf:Message>" +
-                        "</nf:News>");
-
-        receive(newsSoapServer)
-                .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                            "<nf:Message>" + message + "</nf:Message>" +
-                        "</nf:News>")
-                .header(SoapMessageHeaders.SOAP_ACTION, "newsFeed");
-
-        send(newsSoapServer)
-                .header(SoapMessageHeaders.HTTP_STATUS_CODE, "200");
-    }
+    public void newsFeed_DataProvider_Ok_Test(String message) {}
 
     @DataProvider
     public Object[][] messageDataProvider() {

@@ -16,76 +16,17 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.ws.client.WebServiceClient;
-import com.consol.citrus.ws.server.WebServiceServer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private WebServiceClient todoClient;
-
-    @Autowired
-    private WebServiceServer todoServer;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testAddTodoEntry() {
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-
-        soap()
-            .client(todoClient)
-            .send()
-            .fork(true)
-            .soapAction("addTodoEntry")
-            .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
-
-        soap()
-            .server(todoServer)
-            .receive()
-            .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"))
-            .header(new ClassPathResource("templates/soapWsAddressingHeader.xml"));
-
-        soap()
-            .server(todoServer)
-            .send()
-            .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
-
-        soap()
-            .client(todoClient)
-            .receive()
-            .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
-
-        soap()
-            .client(todoClient)
-            .send()
-            .fork(true)
-            .soapAction("getTodoList")
-            .payload(new ClassPathResource("templates/getTodoListRequest.xml"));
-
-        soap()
-            .server(todoServer)
-            .receive()
-            .payload(new ClassPathResource("templates/getTodoListRequest.xml"))
-            .header(new ClassPathResource("templates/soapWsAddressingHeader.xml"));
-
-        soap()
-            .server(todoServer)
-            .send()
-            .payload(new ClassPathResource("templates/getTodoListResponse.xml"));
-
-        soap()
-            .client(todoClient)
-            .receive()
-            .payload(new ClassPathResource("templates/getTodoListResponse.xml"));
-    }
+    @CitrusXmlTest(name = "TodoListIT")
+    public void testTodoList() {}
 
 }

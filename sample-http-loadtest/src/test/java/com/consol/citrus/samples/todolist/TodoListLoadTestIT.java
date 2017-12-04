@@ -16,53 +16,20 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusResource;
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.design.TestDesigner;
-import com.consol.citrus.dsl.testng.TestNGCitrusTest;
-import com.consol.citrus.http.client.HttpClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.testng.annotations.*;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
+import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
 @Test(invocationCount = 250, threadPoolSize = 25)
-public class TodoListLoadTestIT extends TestNGCitrusTest {
+public class TodoListLoadTestIT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    private HttpClient todoClient;
+    @CitrusXmlTest(name = "TodoList_Add_IT")
+    public void testAddTodo() {}
 
-    @Parameters( { "designer" })
-    @CitrusTest
-    public void testAddTodo(@Optional @CitrusResource TestDesigner designer) {
-        designer.http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .contentType("application/x-www-form-urlencoded")
-            .payload("title=citrus:concat('todo_', citrus:randomNumber(10))");
-
-        designer.http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.FOUND);
-    }
-
-    @Parameters( { "designer" })
-    @CitrusTest
-    public void testListTodos(@Optional @CitrusResource TestDesigner designer) {
-        designer.http()
-            .client(todoClient)
-            .send()
-            .get("/todolist")
-            .accept("text/html");
-
-        designer.http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK);
-    }
+    @CitrusXmlTest(name = "TodoList_Get_IT")
+    public void testListTodos() {}
 
 }

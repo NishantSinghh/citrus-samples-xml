@@ -15,7 +15,53 @@
       <last-updated-on>2017-11-14T12:00:00</last-updated-on>
     </meta-info>
 
+    <variables>
+      <variable name="todoId" value="citrus:randomUUID()"/>
+      <variable name="todoName" value="citrus:concat('todo_', ${todoId})"/>
+      <variable name="todoDescription" value="Description: ${todoName}"/>
+      <variable name="done" value="false"/>
+    </variables>
+
     <actions>
+      <http:send-request uri="http://localhost:8080">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/json"/>
+          <http:body type="json">
+            <http:data>
+              <![CDATA[
+                { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+              ]]>
+            </http:data>
+          </http:body>
+        </http:POST>
+      </http:send-request>
+
+      <http:receive-response uri="http://localhost:8080">
+        <http:headers status="200"/>
+        <http:body type="plaintext">
+          <http:data>${todoId}</http:data>
+        </http:body>
+      </http:receive-response>
+
+      <http:send-request uri="http://localhost:8080">
+        <http:GET path="/todo/${todoId}">
+          <http:headers accept="application/json"/>
+        </http:GET>
+      </http:send-request>
+
+      <http:receive-response uri="http://localhost:8080">
+        <http:headers status="200"/>
+        <http:body type="json">
+          <http:validate>
+            <http:json-path expression="$.keySet()" value="@assertThat(hasSize(4))@"/>
+            <http:json-path expression="$.id" value="@assertThat(equalTo(${todoId}))@"/>
+            <http:json-path expression="$.title" value="@assertThat(allOf(startsWith(todo_), endsWith(${todoId})))@"/>
+            <http:json-path expression="$.description" value="@assertThat(anyOf(startsWith(Description:), nullValue()))@"/>
+            <http:json-path expression="$.done" value="@assertThat(not(true))@"/>
+          </http:validate>
+        </http:body>
+      </http:receive-response>
+
       <http:send-request client="todoListClient">
         <http:GET path="/todolist">
           <http:headers accept="text/html">

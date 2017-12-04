@@ -16,66 +16,16 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.rmi.client.RmiClient;
-import com.consol.citrus.rmi.message.RmiMessage;
-import com.consol.citrus.rmi.server.RmiServer;
-import com.consol.citrus.samples.todolist.remote.TodoListService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private RmiClient todoRmiClient;
-
-    @Autowired
-    private RmiServer todoRmiServer;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testAddTodo() {
-        send(todoRmiClient)
-            .fork(true)
-            .message(RmiMessage.invocation(TodoListService.class, "addTodo")
-                    .argument("todo-star")
-                    .argument("Star me on github"));
-
-        receive(todoRmiServer)
-            .message(RmiMessage.invocation(TodoListService.class, "addTodo")
-                    .argument("todo-star")
-                    .argument("Star me on github"));
-
-        send(todoRmiServer)
-            .message(RmiMessage.result());
-
-        receive(todoRmiClient)
-            .message(RmiMessage.result());
-    }
-
-    @Test
-    @CitrusTest
-    public void testGetTodos() {
-        send(todoRmiClient)
-                .fork(true)
-                .message(RmiMessage.invocation(TodoListService.class, "getTodos"));
-
-        receive(todoRmiServer)
-                .message(RmiMessage.invocation(TodoListService.class, "getTodos"));
-
-        send(todoRmiServer)
-                .payload("<service-result xmlns=\"http://www.citrusframework.org/schema/rmi/message\">" +
-                            "<object type=\"java.util.Map\" value=\"{todo-follow=Follow us on github}\"/>" +
-                        "</service-result>");
-
-        receive(todoRmiClient)
-                .payload("<service-result xmlns=\"http://www.citrusframework.org/schema/rmi/message\">" +
-                            "<object type=\"java.util.LinkedHashMap\" value=\"{todo-follow=Follow us on github}\"/>" +
-                        "</service-result>");
-    }
-
+    @CitrusXmlTest(name = "TodoListIT")
+    public void testAddTodo() {}
 }

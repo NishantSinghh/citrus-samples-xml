@@ -28,6 +28,6 @@ public class IncidentManager_Http_Ok_2_IT extends AbstractTestNGCitrusTest {
 
     @Test
     @CitrusXmlTest(name = "IncidentManager_Http_Ok_2_IT")
-    public void testIncidentManager_Http_Ok_1() {
+    public void testIncidentManager_Http_Ok_2() {
     }
 }

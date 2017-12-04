@@ -16,16 +16,7 @@
 
 package com.consol.citrus.samples.kubernetes;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.kubernetes.client.KubernetesClient;
-import com.consol.citrus.kubernetes.command.WatchEventResult;
-import com.consol.citrus.message.MessageType;
-import io.fabric8.kubernetes.client.Watcher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.CollectionUtils;
-import org.testng.Assert;
+import com.consol.citrus.annotations.CitrusXmlTest;
 import org.testng.annotations.Test;
 
 /**
@@ -33,161 +24,15 @@ import org.testng.annotations.Test;
  */
 public class TodoListIT extends AbstractKubernetesIT {
 
-    @Autowired
-    private KubernetesClient k8sClient;
-
-    @Autowired
-    private HttpClient todoClient;
+    @Test
+    @CitrusXmlTest(name = "TodoList_Deployment_IT")
+    public void testDeploymentState() {}
 
     @Test
-    @CitrusTest
-    public void testDeploymentState() {
-        kubernetes()
-            .client(k8sClient)
-            .pods()
-            .list()
-            .label("app=todo")
-            .validate("$..status.phase", "Running")
-            .validate((pods, context) -> {
-                Assert.assertFalse(CollectionUtils.isEmpty(pods.getResult().getItems()));
-            });
-
-        kubernetes()
-            .client(k8sClient)
-            .services()
-            .get("citrus-sample-todo-service")
-            .validate((service, context) -> {
-                Assert.assertNotNull(service.getResult());
-            });
-    }
+    @CitrusXmlTest(name = "TodoList_Service_IT")
+    public void testTodoService() {}
 
     @Test
-    @CitrusTest
-    public void testTodoService() {
-        variable("todoId", "citrus:randomUUID()");
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
-
-    @Test
-    @CitrusTest
-    public void testTodoServiceReplication() {
-        timer()
-            .timerId("createTodoItems")
-            .fork(true)
-            .delay(500L)
-            .interval(1000L)
-            .repeatCount(5)
-            .actions(
-                createVariable("todoId", "citrus:randomUUID()"),
-                createVariable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))"),
-                createVariable("todoDescription", "Description: ${todoName}"),
-                createVariable("done", "false"),
-                http()
-                    .client(todoClient)
-                    .send()
-                    .post("/todolist")
-                    .messageType(MessageType.JSON)
-                    .contentType("application/json")
-                    .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}"),
-
-                http()
-                    .client(todoClient)
-                    .receive()
-                    .response(HttpStatus.OK)
-                    .messageType(MessageType.PLAINTEXT)
-                    .payload("${todoId}")
-            );
-
-        kubernetes()
-            .pods()
-            .list()
-            .label("app=todo")
-            .validate((pods, context) -> {
-                Assert.assertNotNull(pods.getResult());
-                Assert.assertEquals(pods.getResult().getItems().size(), 1L);
-                context.setVariable("todoPod", pods.getResult().getItems().get(0).getMetadata().getName());
-            });
-
-        parallel()
-            .actions(
-                kubernetes()
-                    .pods()
-                    .watch()
-                    .name("${todoPod}")
-                    .namespace("default")
-                    .validate((result, context) -> Assert.assertEquals(((WatchEventResult) result).getAction(), Watcher.Action.MODIFIED)),
-                kubernetes()
-                    .pods()
-                    .delete("${todoPod}")
-                    .namespace("default")
-                    .validate((result, context) -> Assert.assertTrue(result.getResult().getSuccess()))
-            );
-
-        sleep(2000L);
-
-        stopTimer("createTodoItems");
-
-        createVariable("todoId", "citrus:randomUUID()");
-        createVariable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        createVariable("todoDescription", "Description: ${todoName}");
-        createVariable("done", "false");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
+    @CitrusXmlTest(name = "TodoList_Replication_IT")
+    public void testTodoServiceReplication() {}
 }

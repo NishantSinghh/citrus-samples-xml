@@ -17,7 +17,7 @@
 package com.consol.citrus.samples.docker;
 
 import com.consol.citrus.docker.client.DockerClient;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.concurrent.*;
 /**
  * @author Christoph Deppisch
  */
-public class AbstractDockerIT extends TestNGCitrusTestDesigner {
+public class AbstractDockerIT extends AbstractTestNGCitrusTest {
 
     /** Logger */
     private static Logger log = LoggerFactory.getLogger(AbstractDockerIT.class);

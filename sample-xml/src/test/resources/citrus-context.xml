@@ -18,7 +18,7 @@
         <citrus:namespace prefix="t" uri="http://citrusframework.org/samples/todolist"/>
     </citrus:namespace-context>
 
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
 
 </beans>

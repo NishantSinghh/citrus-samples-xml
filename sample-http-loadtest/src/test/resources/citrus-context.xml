@@ -13,7 +13,7 @@
       <citrus:namespace prefix="xh" uri="http://www.w3.org/1999/xhtml"/>
     </citrus:namespace-context>
 
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
     
 </beans>

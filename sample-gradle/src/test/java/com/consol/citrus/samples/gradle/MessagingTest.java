@@ -16,37 +16,16 @@
 
 package com.consol.citrus.samples.gradle;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.channel.ChannelEndpoint;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-@ContextConfiguration(classes = { EndpointConfig.class })
-public class MessagingTest extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private ChannelEndpoint testChannelEndpoint;
+public class MessagingTest extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testMessaging() {
-        echo("Test simple message send and receive");
-
-        send(testChannelEndpoint)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("Hello Citrus!");
-
-        receive(testChannelEndpoint)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("Hello Citrus!");
-
-        echo("Successful send and receive");
-    }
+    @CitrusXmlTest(name = "MessagingTest")
+    public void testMessaging() {}
 }

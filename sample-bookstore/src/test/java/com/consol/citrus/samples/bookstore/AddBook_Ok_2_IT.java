@@ -16,65 +16,17 @@
 
 package com.consol.citrus.samples.bookstore;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.context.TestContext;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.samples.bookstore.model.*;
-import com.consol.citrus.validation.xml.XmlMarshallingValidationCallback;
-import com.consol.citrus.ws.client.WebServiceClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.oxm.Marshaller;
-import org.springframework.util.Assert;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
-
-import java.util.Calendar;
-import java.util.Map;
 
 /**
  * @author Christoph Deppisch
  */
 @Test
-public class AddBook_Ok_2_IT extends TestNGCitrusTestDesigner {
+public class AddBook_Ok_2_IT extends AbstractTestNGCitrusTest {
 
-    @Autowired
-    @Qualifier("bookStoreClient")
-    private WebServiceClient bookStoreClient;
-    
-    @Autowired
-    private Marshaller marshaller;
-
-    @CitrusTest(name = "AddBook_Ok_2_IT")
-    public void addBookTest() {
-        String isbn = "978-citrus:randomNumber(10)";
-        
-        send(bookStoreClient)
-            .payload(createAddBookRequestMessage(isbn), marshaller)
-            .header("citrus_soap_action", "addBook");
-        
-        receive(bookStoreClient)
-            .validationCallback(new XmlMarshallingValidationCallback<AddBookResponseMessage>() {
-                @Override
-                public void validate(AddBookResponseMessage response, Map<String, Object> headers, TestContext context) {
-                    Assert.isTrue(response.isSuccess());
-                }
-            });
-    }
-    
-    /**
-     * @param isbn
-     * @return
-     */
-    private AddBookRequestMessage createAddBookRequestMessage(String isbn) {
-        AddBookRequestMessage requestMessage = new AddBookRequestMessage();
-        Book book = new Book();
-        book.setAuthor("Mike Loukides, Sonatype");
-        book.setTitle("Maven: The Definitive Guide");
-        book.setIsbn(isbn);
-        book.setYear(2008);
-        book.setRegistrationDate(Calendar.getInstance());
-        requestMessage.setBook(book);
-        return requestMessage;
-    }
+    @CitrusXmlTest(name = "AddBook_Ok_2_IT")
+    public void addBookTest() {}
 
 }

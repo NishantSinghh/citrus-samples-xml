@@ -14,10 +14,10 @@
         <citrus:variable name="todoDescription" value="Description: todo_1871"/>
     </citrus:global-variables>
 	
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
 
-    <citrus-http:server id="todoListServer"
+    <citrus-http:server id="todoServer"
                       port="8080"
                       auto-start="true"
                       timeout="10000"

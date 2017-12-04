@@ -16,75 +16,21 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private HttpClient todoClient;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testIndexPage() {
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todolist")
-            .accept("text/html");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.XHTML)
-            .xpath("//xh:h1", "TODO list")
-            .payload("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" +
-                    "\"org/w3/xhtml/xhtml1-transitional.dtd\">" +
-                    "<html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-                        "<head>@ignore@</head>" +
-                        "<body>@ignore@</body>" +
-                    "</html>");
-    }
+    @CitrusXmlTest(name = "TodoList_Get_IT")
+    public void testGet() {}
 
     @Test
-    @CitrusTest
-    public void testAddTodoEntry() {
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .contentType("application/x-www-form-urlencoded")
-            .payload("title=${todoName}&description=${todoDescription}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.FOUND);
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todolist")
-            .accept("text/html");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.XHTML)
-            .xpath("(//xh:li[@class='list-group-item']/xh:span)[last()]", "${todoName}");
-    }
+    @CitrusXmlTest(name = "TodoList_Post_IT")
+    public void testPost() {}
 
 }

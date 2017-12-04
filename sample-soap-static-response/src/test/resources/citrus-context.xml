@@ -14,12 +14,12 @@
         <citrus:variable name="todoDescription" value="Description: todo_1871"/>
     </citrus:global-variables>
 	
-    <citrus-ws:client id="todoListClient"
+    <citrus-ws:client id="todoClient"
                         request-url="http://localhost:8080"/>
 
     <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
 
-    <citrus-ws:server id="todoListServer"
+    <citrus-ws:server id="todoServer"
                       port="8080"
                       auto-start="true"
                       timeout="10000"

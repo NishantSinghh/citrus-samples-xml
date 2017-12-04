@@ -16,49 +16,35 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.TestCaseMetaInfo;
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
+import com.consol.citrus.annotations.CitrusXmlTest;
 import com.consol.citrus.exceptions.CitrusRuntimeException;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
 @Test
-public class SimpleSampleIT extends TestNGCitrusTestDesigner {
+public class SimpleSampleIT extends AbstractTestNGCitrusTest {
 
-    @CitrusTest
-    public void testSuccessFirst() {
-        echo("1st test successful");
-    }
+    @CitrusXmlTest(name = "Success_01_IT")
+    public void testSuccessFirst() {}
 
-    @CitrusTest
-    public void testSuccessSecond() {
-        echo("2nd test successful");
-    }
+    @CitrusXmlTest(name = "Success_02_IT")
+    public void testSuccessSecond() {}
 
-    @CitrusTest
-    public void testSuccessThird() {
-        echo("3rd test successful");
-    }
+    @CitrusXmlTest(name = "Success_03_IT")
+    public void testSuccessThird() {}
 
     @Test(expectedExceptions = CitrusRuntimeException.class)
-    @CitrusTest
-    public void testFail() {
-        fail("This test should fail!");
-    }
+    @CitrusXmlTest(name = "Fail_01_IT")
+    public void testFail() {}
 
     @Test(expectedExceptions = CitrusRuntimeException.class)
-    @CitrusTest
-    public void testAnotherFail() {
-        fail("Another test should fail!");
-    }
+    @CitrusXmlTest(name = "Fail_01_IT")
+    public void testAnotherFail() {}
 
-    @CitrusTest
-    public void testSkipped() {
-        status(TestCaseMetaInfo.Status.DISABLED);
-        echo("This test is skipped");
-    }
+    @CitrusXmlTest(name = "Skip_01_IT")
+    public void testSkipped() {}
 
 }

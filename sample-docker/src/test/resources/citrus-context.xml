@@ -15,7 +15,7 @@
     <citrus-docker:client id="dockerClient"
                           url="unix:///var/run/dockerhost/docker.sock"/>
 
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://todo-app:8080"/>
 
 </beans>

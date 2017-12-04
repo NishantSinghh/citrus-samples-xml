@@ -96,16 +96,4 @@
                     port="18005"
                     timeout="10000"/>
 
-  <!-- Jaxb2 Marshaller -->
-  <oxm:jaxb2-marshaller id="jaxb2Marshaller">
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.incidentmanager.v1.OpenIncident"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.incidentmanager.v1.OpenIncidentResponse"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.networkservice.v1.AnalyseIncident"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.networkservice.v1.AnalyseIncidentResponse"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.fieldforceservice.v1.OrderRequest"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.fieldforceservice.v1.OrderNotification"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.smsgateway.v1.SendSmsRequest"/>
-    <oxm:class-to-be-bound name="org.citrusframework.schema.samples.smsgateway.v1.SendSmsResponse"/>
-  </oxm:jaxb2-marshaller>
-
 </beans>

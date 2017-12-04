@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2015 the original author or authors.
+ * Copyright 2006-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,17 @@
 
 package com.consol.citrus;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.ws.message.SoapMessageHeaders;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
- * @since 2.1
+ * @since 2.0
  */
 @Test
-public class NewsFeedIT extends TestNGCitrusTestDesigner {
+public class NewsFeedIT extends AbstractTestNGCitrusTest {
 
-    @CitrusTest(name = "NewsFeed_Ok_IT")
-    public void newsFeed_Ok_Test() {
-        send("newsJmsEndpoint")
-                .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                            "<nf:Message>Citrus rocks!</nf:Message>" +
-                        "</nf:News>");
-
-        receive("newsSoapServer")
-                .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                            "<nf:Message>Citrus rocks!</nf:Message>" +
-                        "</nf:News>")
-                .header(SoapMessageHeaders.SOAP_ACTION, "newsFeed");
-
-        send("newsSoapServer")
-                .header(SoapMessageHeaders.HTTP_STATUS_CODE, "200");
-    }
-
+    @CitrusXmlTest(name = "NewsFeed_Ok_IT")
+    public void newsFeedXml_Ok_Test() {}
 }

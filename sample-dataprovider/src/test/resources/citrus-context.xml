@@ -8,7 +8,7 @@
        http://www.citrusframework.org/schema/config http://www.citrusframework.org/schema/config/citrus-config.xsd
        http://www.citrusframework.org/schema/http/config http://www.citrusframework.org/schema/http/config/citrus-http-config.xsd">
 	
-    <citrus-http:client id="todoListClient"
+    <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
     
 </beans>

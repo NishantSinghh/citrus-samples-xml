@@ -16,83 +16,28 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.http.client.HttpClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private HttpClient todoClient;
-
-    @Autowired
-    private HttpClient todoBasicAuthClient;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testBasicAuth() {
-        http()
-            .client(todoBasicAuthClient)
-            .send()
-            .get("/todo/")
-            .accept("application/xml");
-
-        http()
-            .client(todoBasicAuthClient)
-            .receive()
-            .response(HttpStatus.OK);
-    }
+    @CitrusXmlTest(name = "TodoList_BasicAuth_IT")
+    public void testBasicAuth() {}
 
     @Test
-    @CitrusTest
-    public void testBasicAuthHeader() {
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/")
-            .accept("application/xml")
-            .header("Authorization", "Basic citrus:encodeBase64('citrus:secr3t')");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK);
-    }
+    @CitrusXmlTest(name = "TodoList_BasicAuthHeader_IT")
+    public void testBasicAuthHeader() {}
 
     @Test
-    @CitrusTest
-    public void testBasicAuthMissing() {
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/")
-            .accept("application/xml");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.UNAUTHORIZED);
-    }
+    @CitrusXmlTest(name = "TodoList_BasicAuthMissing_IT")
+    public void testBasicAuthMissing() {}
 
     @Test
-    @CitrusTest
-    public void testBasicAuthFailed() {
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/")
-            .accept("application/xml")
-            .header("Authorization", "Basic citrus:encodeBase64('wrong:wrong')");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.UNAUTHORIZED);
-    }
+    @CitrusXmlTest(name = "TodoList_BasicAuthMissing_IT")
+    public void testBasicAuthFailed() {}
 }

@@ -21,7 +21,7 @@
 
     <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
 
-    <citrus-ws:client id="todoListClient"
+    <citrus-ws:client id="todoClient"
                       request-url="http://localhost:8080/services/ws/todolist"/>
 
 </beans>

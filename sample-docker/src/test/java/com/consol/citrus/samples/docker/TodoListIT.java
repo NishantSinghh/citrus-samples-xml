@@ -16,13 +16,7 @@
 
 package com.consol.citrus.samples.docker;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.docker.client.DockerClient;
-import com.consol.citrus.http.client.HttpClient;
-import com.consol.citrus.message.MessageType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.testng.Assert;
+import com.consol.citrus.annotations.CitrusXmlTest;
 import org.testng.annotations.Test;
 
 /**
@@ -30,55 +24,11 @@ import org.testng.annotations.Test;
  */
 public class TodoListIT extends AbstractDockerIT {
 
-    @Autowired
-    private DockerClient dockerClient;
-
-    @Autowired
-    private HttpClient todoClient;
+    @Test
+    @CitrusXmlTest(name ="TodoList_Deployment_IT")
+    public void todoListDeploymentIT() {}
 
     @Test
-    @CitrusTest
-    public void testDeploymentState() {
-        docker()
-            .client(dockerClient)
-            .inspectContainer("todo-app")
-            .validateCommandResult((container, context) -> Assert.assertTrue(container.getState().getRunning()));
-    }
-
-    @Test
-    @CitrusTest
-    public void testTodoService() {
-        variable("todoId", "citrus:randomUUID()");
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client(todoClient)
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client(todoClient)
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
+    @CitrusXmlTest(name ="TodoListIT")
+    public void todoListIT() {}
 }

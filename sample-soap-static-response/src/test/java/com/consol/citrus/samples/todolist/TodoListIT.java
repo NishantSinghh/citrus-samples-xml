@@ -16,64 +16,17 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.ws.client.WebServiceClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-public class TodoListIT extends TestNGCitrusTestDesigner {
-
-    @Autowired
-    private WebServiceClient todoClient;
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testTodo() {
-        soap()
-            .client(todoClient)
-            .send()
-            .soapAction("getTodo")
-            .payload("<todo:getTodoRequest xmlns:todo=\"http://citrusframework.org/samples/todolist\"></todo:getTodoRequest>");
-
-        soap()
-            .client(todoClient)
-            .receive()
-            .payload("<getTodoResponse xmlns=\"http://citrusframework.org/samples/todolist\">" +
-                        "<todoEntry>" +
-                            "<id>${todoId}</id>" +
-                            "<title>${todoName}</title>" +
-                            "<description>${todoDescription}</description>" +
-                            "<done>false</done>" +
-                        "</todoEntry>" +
-                    "</getTodoResponse>");
-    }
-
-    @Test
-    @CitrusTest
-    public void testTodoList() {
-        soap()
-            .client(todoClient)
-            .send()
-            .soapAction("getTodoList")
-            .payload("<todo:getTodoListRequest xmlns:todo=\"http://citrusframework.org/samples/todolist\"></todo:getTodoListRequest>");
-
-        soap()
-            .client(todoClient)
-            .receive()
-            .payload("<getTodoListResponse xmlns=\"http://citrusframework.org/samples/todolist\">" +
-                        "<list>" +
-                            "<todoEntry>" +
-                                "<id>${todoId}</id>" +
-                                "<title>${todoName}</title>" +
-                                "<description>${todoDescription}</description>" +
-                                "<done>false</done>" +
-                            "</todoEntry>" +
-                        "</list>" +
-                    "</getTodoListResponse>");
-    }
+    @CitrusXmlTest(name = "TodoListIT")
+    public void testTodoList() {}
 
 }

@@ -16,80 +16,21 @@
 
 package com.consol.citrus.samples.todolist;
 
-import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.testng.TestNGCitrusTestDesigner;
-import com.consol.citrus.message.MessageType;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
+import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
 /**
  * @author Christoph Deppisch
  */
-@ContextConfiguration(classes = JmsConfig.class)
-public class TodoListIT extends TestNGCitrusTestDesigner {
+public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusTest
-    public void testHttpAddTodoEntry() {
-        variable("todoId", "citrus:randomUUID()");
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        http()
-            .client("http://localhost:8080")
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        http()
-            .client("http://localhost:8080")
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload("${todoId}");
-
-        http()
-            .client("http://localhost:8080")
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client("http://localhost:8080")
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
+    @CitrusXmlTest(name = "TodoListIT")
+    public void testHttpAddTodoEntry() {}
 
     @Test
-    @CitrusTest
-    public void testAddTodoEntry() {
-        variable("todoId", "citrus:randomUUID()");
-        variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-        variable("todoDescription", "Description: ${todoName}");
-        variable("done", "false");
-
-        send("jms:queue:jms.todo.inbound?connectionFactory=activeMqConnectionFactory")
-            .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-
-        http()
-            .client("http://localhost:8080")
-            .send()
-            .get("/todo/${todoId}")
-            .accept("application/json");
-
-        http()
-            .client("http://localhost:8080")
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.JSON)
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-    }
+    @CitrusXmlTest(name = "TodoListJmsIT")
+    public void testJmsAddTodoEntry() {}
 
 }

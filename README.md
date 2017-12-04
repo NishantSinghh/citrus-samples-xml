@@ -65,7 +65,6 @@ that demonstrates the messaging aspect.
 | [sample-greeting](sample-greeting)           |  X  |      |      |    X    |       |            |      |  X   |   X   |
 | [sample-bookstore](sample-bookstore)         |  X  |      |  X   |         |       |            |      |  X   |       |
 | [sample-incident](sample-incident)           |  X  |  X   |  X   |         |       |            |      |  X   |   X   |
-| [sample-javaee](sample-javaee)               |  X  |  X   |      |         |       |     X      |      |  X   |   X   |
 |                                              |     |      |      |         |       |            |      |      |       |
 
 Pick your sample application for try out and got to the respective folder.
