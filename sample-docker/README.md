@@ -249,21 +249,22 @@ for accessing the REST API:
 As you can see the client will be able to resolve the hostname *todo-app* via Docker networking feature. The test may then access the REST API over http in order to
 add new todo items.
 
-```java
-http()
-    .client(todoClient)
-    .send()
-    .post("/todolist")
-    .messageType(MessageType.JSON)
-    .contentType("application/json")
-    .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+```xml
+<http:send-request client="todoClient">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/json"/>
+      <http:body type="json">
+        <http:data>{ "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}</http:data>
+      </http:body>
+    </http:POST>
+</http:send-request>
 
-http()
-    .client(todoClient)
-    .receive()
-    .response(HttpStatus.OK)
-    .messageType(MessageType.PLAINTEXT)
-    .payload("${todoId}");
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK" version="HTTP/1.1"/>
+    <http:body type="plaintext">
+      <http:data>${todoId}</http:data>
+    </http:body>
+</http:receive-response>
 ```
 
 In addition to that the Citrus configuration also defines a Docker client component:
@@ -275,15 +276,60 @@ In addition to that the Citrus configuration also defines a Docker client compon
 
 This client is then able to access the Docker API from within the Citrus test container in order to check the deployment state of the system under test.
 
-```java
-docker()
-    .client(dockerClient)
-    .inspectContainer("todo-app")
-    .validateCommandResult((container, context) -> Assert.assertTrue(container.getState().getRunning()));
+```xml
+<docker:inspect container="todo-app">
+    <docker:expect>
+      <docker:result>
+        <![CDATA[
+        {
+          "Args":"@ignore@",
+          "Config":"@ignore@",
+          "Created":"@ignore@",
+          "Driver":"@ignore@",
+          "ExecDriver":"@ignore@",
+          "HostConfig":"@ignore@",
+          "HostnamePath":"@ignore@",
+          "HostsPath":"@ignore@",
+          "LogPath":"@ignore@",
+          "Id":"@ignore@",
+          "SizeRootFs":"@ignore@",
+          "Image":"@ignore@",
+          "MountLabel":"",
+          "Name":"/todo-app",
+          "RestartCount":0,
+          "NetworkSettings":"@ignore@",
+          "Path":"/bin/sh",
+          "ProcessLabel":"@ignore@",
+          "ResolvConfPath":"@ignore@",
+          "ExecIDs":null,
+          "State":
+          {
+            "Status": "running",
+            "Running":true,
+            "Paused":false,
+            "Restarting":false,
+            "Dead":false,
+            "oomkilled":false,
+            "OOMKilled":false,
+            "Pid": "@ignore@",
+            "ExitCode":0,
+            "Error":"",
+            "StartedAt":"@ignore@",
+            "FinishedAt":"@ignore@",
+            "Health":null
+          },
+          "Volumes": "@ignore@",
+          "VolumesRW": "@ignore@",
+          "Mounts":"@ignore@"
+        }
+        ]]>
+      </docker:result>
+    </docker:expect>
+</docker:inspect>
 ```
    
 The test action above verifies that the *todo-app* container is up and running. We can also think of manipulating the Docker container. With the Docker Citrus
-Java DSL we have full access to the Docker API. Please note that this is only applicable for testing purpose. In production environment the Docker API may
+XML DSL we have full access to the Docker API. Please note that this is only applicable for testing purpose. In production environment the Docker API may
 not be accessible to containers at all. In this local test environment we have mounted the Docker socket into the Citrus test container (`<volume>/var/run/docker.sock:/var/run/dockerhost/docker.sock</volume>`). 
 This should definitely not possible on any production like environment.
 

@@ -8,12 +8,13 @@ Objectives
 
 In this sample project we want to configure both Http client and server to use basic authentication. On client side we can add the basic authentication header manually in each send operation.
 
-    http()
-        .client(todoClient)
-        .send()
-        .get("/todo")
-        .accept("application/xml")
-        .header("Authorization", "Basic citrus:encodeBase64('citrus:secr3t')");
+    <http:send-request client="todoClient">
+        <http:GET path="/todo">
+          <http:headers accept="application/xml">
+            <http:header name="Authorization" value="Basic citrus:encodeBase64('citrus:secr3t')"/>
+          </http:headers>
+        </http:GET>
+    </http:send-request>
         
 The `Authorization` header is holding the username password combination as base64 encoded string. We need to add this header manually to the send operation. The server will verify the username password
 before the request is processed. This is an easy way to add basic authentication information to a request in Citrus. On the downside we have to manually add the authentication header in each send operation.

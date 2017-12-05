@@ -58,16 +58,17 @@ is not allowed.
 As you can see we load the keystore file **keys/citrus.jks** in order to setup the http client ssl context. In the Citrus test case you can use the client component as usual for 
 sending messages to the server.
 
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("addTodoEntry")
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
-
-    soap()
-        .client(todoClient)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));    
+    <ws:send endpoint="todoClient" fork="true" soap-action="addTodoEntry">
+        <message>
+          <resource file="templates/addTodoEntryRequest.xml"/>
+        </message>
+    </ws:send>
+    
+    <ws:receive endpoint="todoClient">
+        <message>
+          <resource file="templates/addTodoEntryResponse.xml"/>
+        </message>
+    </ws:receive>    
         
 On the server side the configuration looks like follows:
         
@@ -118,15 +119,17 @@ that defines the certificates and on the secure port **8443**. Client now have t
        
 In the test case we can receive the requests and provide proper response messages as usual.
 
-    soap()
-        .server(todoServer)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
+    <ws:receive endpoint="todoSslServer">
+        <message>
+          <resource file="templates/addTodoEntryRequest.xml"/>
+        </message>
+    </ws:receive>
 
-    soap()
-        .server(todoServer)
-        .send()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+    <ws:send endpoint="todoSslServer">
+        <message>
+          <resource file="templates/addTodoEntryResponse.xml"/>
+        </message>
+    </ws:send>
        
 Run
 ---------

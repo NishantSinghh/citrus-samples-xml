@@ -28,42 +28,7 @@ This creates very basic load testing scenarios. Of course the tests need to be s
 operations in the test and you may have to correlate response messages so the test instances will not steal messages from each other during the test run.
 
     @Test(invocationCount = 250, threadPoolSize = 25)
-    public class TodoListLoadTestIT extends TestNGCitrusTest {
-    
-        @Autowired
-        private HttpClient todoClient;
-    
-        @Parameters( { "designer" })
-        @CitrusTest
-        public void testAddTodo(@Optional @CitrusResource TestDesigner designer) {
-            designer.http()
-                .client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=citrus:concat('todo_', citrus:randomNumber(10))");
-    
-            designer.http()
-                .client(todoClient)
-                .receive()
-                .response(HttpStatus.FOUND);
-        }
-    
-        @Parameters( { "designer" })
-        @CitrusTest
-        public void testListTodos(@Optional @CitrusResource TestDesigner designer) {
-            designer.http()
-                .client(todoClient)
-                .send()
-                .get("/todolist")
-                .accept("text/html");
-    
-            designer.http()
-                .client(todoClient)
-                .receive()
-                .response(HttpStatus.OK);
-        }
-    
+    public class TodoListLoadTestIT extends AbstractTestNGCitrusTest {
     }
     
 There are two test methods one adding a new todo entry with form url encoded Http POST request and one getting the whole list of todo entries with GET request.

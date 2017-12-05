@@ -47,9 +47,10 @@ After the test we delete all test data again.
 In the test case we can reference the datasource in order to access the stored data and
 verify the result sets.
 
-    query(todoDataSource)
-        .statement("select count(*) as cnt from todo_entries where title = '${todoName}'")
-        .validate("cnt", "1");
+    <sql datasource="todoDataSource">
+        <statement>select count(*) as cnt from todo_entries where title = '${todoName}'</statement>
+        <validate column="cnt" value="0"/>
+    </sql>
 
 Run
 ---------

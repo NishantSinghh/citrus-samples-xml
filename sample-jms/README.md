@@ -21,9 +21,18 @@ started with the Maven build lifecycle.
     
 No we can add a new todo entry by sending a JSON message to the JMS queue destination.
     
-    send(todoJmsEndpoint)
-        .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-        .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+    <send endpoint="todoJmsEndpoint">
+        <message type="binary">
+          <data>
+            <![CDATA[
+              { "title": "${todoName}", "description": "${todoDescription}", "done": ${done} }
+            ]]>
+          </data>
+        </message>
+        <header>
+          <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+        </header>
+    </send>
         
 We have to add a special message header **_type** which is required by the system under test for message conversion. The message payload
 is the JSON representation of a todo entry model object.

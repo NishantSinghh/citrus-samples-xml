@@ -28,25 +28,39 @@ in the Citrus test with some annotation magic.
     @CitrusTest
     @CitrusParameters( { "todoName", "todoDescription", "done" })
     public void testProvider(String todoName, String todoDescription, boolean done) {
-        variable("todoId", "citrus:randomUUID()");
+    }
+    
+In the XML test case definition we can use the test variables coming from the data provider.    
+    
+    <actions>
+      <http:send-request client="todoClient">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/json"/>
+          <http:body type="json">
+            <http:data>
+              <![CDATA[
+                { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+              ]]>
+            </http:data>
+          </http:body>
+        </http:POST>
+      </http:send-request>
 
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-        
-        [...]    
-    }            
+      <http:receive-response client="todoClient">
+        <http:headers status="200"/>
+        <http:body type="plaintext">
+          <http:data>${todoId}</http:data>
+        </http:body>
+      </http:receive-response>
+    [...]
+    </actions>                  
         
 As you can see we are able to use the name and description values provided by the data provider. When executed the test performs
 multiple times with respective values:
 
     CITRUS TEST RESULTS
     TodoListIT.testPost([todo1, Description: todo1, false]) ............... SUCCESS
-    TodoListIT.testPost([todo2, Description: todo2, true]) ............... SUCCESS
+    TodoListIT.testPost([todo2, Description: todo2, true])  ............... SUCCESS
     TodoListIT.testPost([todo3, Description: todo3, false]) ............... SUCCESS    
         
 Run

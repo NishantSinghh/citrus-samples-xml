@@ -10,7 +10,6 @@
 
   <citrus:channel id="testChannel"/>
 
-
   <citrus:channel-endpoint id="testChannelEndpoint"
                            channel="testChannel"/>
 </beans>

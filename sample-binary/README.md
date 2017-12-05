@@ -22,10 +22,19 @@ started with the Maven build lifecycle.
     
 No we can send some content as binary message to the JMS queue destination.
 
-```java
-send(todoJmsEndpoint)
-    .messageType(MessageType.BINARY)
-    .message(new DefaultMessage("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}".getBytes()));
+```xml
+<send endpoint="todoJmsEndpoint">
+    <message type="binary">
+      <data>
+        <![CDATA[
+          { "title": "${todoName}", "description": "${todoDescription}", "done": ${done} }
+        ]]>
+      </data>
+    </message>
+    <header>
+      <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+    </header>
+</send>
 ```
 
 The sample uses the `getBytes()` method of Java String class in order to get binary content as byte array. Citrus will automatically
@@ -35,11 +44,19 @@ Now the next step is to receive the same binary message in Citrus in order to do
 by marking the message type as `BINARY`. As binary content is not comparable we use a special message validator implementation that converts the
 binary content to a String representation for comparison.
 
-```java
-receive(todoJmsEndpoint)
-    .messageType(MessageType.BINARY)
-    .validator(new BinaryMessageValidator())
-    .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+```xml
+<receive endpoint="todoJmsEndpoint">
+    <message type="binary" validator="binaryMessageValidator">
+      <data>
+        <![CDATA[
+          { "title": "${todoName}", "description": "${todoDescription}", "done": ${done} }
+        ]]>
+      </data>
+    </message>
+    <header>
+      <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+    </header>
+</receive>
 ```
         
 The binary message validator implementation is very simple and performs String equals for validation:
@@ -70,10 +87,19 @@ This way you can implement your own validation as you know best how to handle th
 We can also use base64 encoding for handling binary data in Citrus. The base64 encoding can be used to process the binary content
 with basic comparison in `BINARY_BASE64` message validator:
 
-```java
-receive(todoJmsEndpoint)
-    .messageType(MessageType.BINARY_BASE64)
-    .payload("citrus:encodeBase64('{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\" }')");
+```xml
+<receive endpoint="todoJmsEndpoint">
+    <message type="binary_base64">
+      <data>
+        <![CDATA[
+          citrus:encodeBase64('{ "title": "${todoName}", "description": "${todoDescription}", "done": ${done} }')
+        ]]>
+      </data>
+    </message>
+    <header>
+      <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+    </header>
+</receive>
 ```
         
 Just use the `encodeBase64` function in Citrus to provide the expected payload content. Citrus will automatically convert the received 

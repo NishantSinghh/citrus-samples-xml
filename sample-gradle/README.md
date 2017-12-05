@@ -44,32 +44,38 @@ This enables the Citrus support for the project so we can use the Citrus classes
 Of course JUnit is also supported. This is all for build configuration settings. We can move on to writing some Citrus integration tests. You can
 find those tests in **src/test/java** directory.
 
-This sample uses pure Java code for both Citrus configuration and tests. The
-Citrus TestNG test uses a context configuration annotation.
+This sample uses pure XML code for both Citrus configuration and tests. The Spring configuration is loaded from the XML file `citrus-context.xml`.
+    
+    <?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:citrus="http://www.citrusframework.org/schema/config"
+           xmlns:citrus-http="http://www.citrusframework.org/schema/http/config"
+           xsi:schemaLocation="
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.citrusframework.org/schema/config http://www.citrusframework.org/schema/config/citrus-config.xsd
+           http://www.citrusframework.org/schema/http/config http://www.citrusframework.org/schema/http/config/citrus-http-config.xsd">
+    
+      <citrus:channel id="testChannel"/>
+    
+      <citrus:channel-endpoint id="testChannelEndpoint"
+                               channel="testChannel"/>
+    </beans>
+    
+In the configuration we are able to define Citrus components for usage in tests. As usual
+we can use the endpoint components as Spring beans in the test cases.
+    
+    <send endpoint="testChannelEndpoint">
+      <message type="plaintext">
+        <data>Hello Citrus!</data>
+      </message>
+    </send>
 
-    @ContextConfiguration(classes = { EndpointConfig.class })
-    
-This tells Spring to load the configuration from the Java class ***EndpointConfig***.
-    
-    public class EndpointConfig {
-        @Bean
-        public ChannelEndpoint testChannelEndpoint() {
-            ChannelEndpointConfiguration endpointConfiguration = new ChannelEndpointConfiguration();
-            endpointConfiguration.setChannel(testChannel());
-            return new ChannelEndpoint(endpointConfiguration);
-        }
-    
-        @Bean
-        private MessageChannel testChannel() {
-            return new MessageSelectingQueueChannel();
-        }
-    }
-    
-In the configuration class we are able to define Citrus components for usage in tests. As usual
-we can autowire the endpoint components as Spring beans in the test cases.
-    
-    @Autowired
-    private ChannelEndpoint testChannelEndpoint;
+    <receive endpoint="testChannelEndpoint">
+      <message type="plaintext">
+        <data>Hello Citrus!</data>
+      </message>
+    </receive>
         
 Run
 ---------

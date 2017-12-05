@@ -86,16 +86,20 @@ The server component has to add the *SOAP-ENV:mustUnderstand* handling explicitl
      
 The server is now ready to receive the request and validate the WSAddressing header information. 
 
-    soap()
-        .server(todoServer)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"))
-        .header(new ClassPathResource("templates/soapWsAddressingHeader.xml"));
+    <ws:receive endpoint="todoServer">
+        <message>
+          <resource file="templates/addTodoEntryRequest.xml"/>
+        </message>
+        <header>
+          <resource file="templates/soapWsAddressingHeader.xml"/>
+        </header>
+    </ws:receive>
 
-    soap()
-        .server(todoServer)
-        .send()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+    <ws:send endpoint="todoServer">
+        <message>
+          <resource file="templates/addTodoEntryResponse.xml"/>
+        </message>
+    </ws:send>
         
 We do this by adding the complete SOAP header as expected XML structure. The header information is loaded from external file resource.
          
@@ -119,13 +123,15 @@ simply because this is a generated UUID value that is newly generated on the cli
 
 In general we can overwrite WSAddressing header information in each send operation by setting the special WSAddressing message headers.
 
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("addTodoEntry")
-        .header(WsAddressingMessageHeaders.ACTION, "http://citrusframework.org/samples/todolist/addTodoEntry")
-        .header(WsAddressingMessageHeaders.MESSAGE_ID, "urn:uuid:citrus:randomUUID()")
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
+    <ws:send endpoint="todoClient" soap-action="addTodoEntry">
+        <message>
+          <resource file="templates/addTodoEntryRequest.xml"/>
+        </message>
+        <header>
+          <element name="WsAddressingMessageHeaders.ACTION" value="http://citrusframework.org/samples/todolist/addTodoEntry"/>
+          <element name="WsAddressingMessageHeaders.MESSAGE_ID" value="urn:uuid:citrus:randomUUID()"/>
+        </header>
+    </ws:send>
         
 Run
 ---------

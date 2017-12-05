@@ -31,14 +31,18 @@ Also the _description_ and _done_ field is set to a proper value.
 
 The dictionary can be applied to each send operation in Citrus.
 
-    http()
-        .client(todoClient)
-        .send()
-        .post("/todolist")
-        .messageType(MessageType.JSON)
-        .dictionary("outboundDictionary")
-        .contentType("application/json")
-        .payload("{ \"id\": \"${todoId}\", \"title\": null, \"description\": null, \"done\": null}"); 
+    <http:send-request client="todoClient">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/json"/>
+          <http:body type="json" data-dictionary="outboundDictionary">
+            <http:data>
+              <![CDATA[
+                { "id": "${todoId}", "title": null, "description": null, "done": null}
+              ]]>
+            </http:data>
+          </http:body>
+        </http:POST>
+    </http:send-request> 
         
 As you can see the outbound dictionary overwrites message content before the actual message is sent out. The message payload in the send operation
 does not need to set proper values for _title_, _description_ and _done_. These values can be _null_. The dictionary makes sure that the message content is manipulated before

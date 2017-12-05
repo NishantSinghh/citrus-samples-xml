@@ -27,12 +27,17 @@ The mail server component needs a special XML namespace in the configuration roo
     
 Now we can receive the mail in the test case.
     
-    receive(mailServer)
-        .payload(new ClassPathResource("templates/mail.xml"))
-        .header(CitrusMailMessageHeaders.MAIL_SUBJECT, "ToDo report");
-
-    send(mailServer)
-        .payload(new ClassPathResource("templates/mail-response.xml"));            
+    <receive endpoint="mailServer">
+        <message>
+          <resource file="templates/mail.xml"/>
+        </message>
+    </receive>
+    
+    <send endpoint="mailServer">
+        <message>
+          <resource file="templates/mail-response.xml"/>
+        </message>
+    </send>            
         
 The mail content is loaded from external file resource. Here is the mail content that we expect to arrive in the test.
 
