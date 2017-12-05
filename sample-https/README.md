@@ -11,119 +11,139 @@ supported certificates. The sample uses the keystore in **src/test/resources/key
 
 We need a special Http client configuration:
 
-    <bean class="com.consol.citrus.samples.todolist.config.HttpClientSslConfig"/>
+```xml
+<bean class="com.consol.citrus.samples.todolist.config.HttpClientSslConfig"/>
 
-    <citrus-http:client id="todoClient"
-                        request-factory="sslRequestFactory"
-                        request-url="https://localhost:8443"/>
+<citrus-http:client id="todoClient"
+                    request-factory="sslRequestFactory"
+                    request-url="https://localhost:8443"/>
+```
     
 The client component references a special request factory and uses the transport scheme **https** on port **8443**. The SSL request factory is defined in a
 Java Spring configuration class simply because it is way more comfortable to do this in Java than in XML.
     
-    @Configuration
-    public class HttpClientSslConfig {
-    
-        @Bean
-        public HttpClient httpClient() {
-            try {
-                SSLContext sslcontext = SSLContexts.custom()
-                        .loadTrustMaterial(new ClassPathResource("keys/citrus.jks").getFile(), "secret".toCharArray(),
-                                new TrustSelfSignedStrategy())
-                        .build();
-    
-                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                        sslcontext, NoopHostnameVerifier.INSTANCE);
-    
-                return HttpClients.custom()
-                        .setSSLSocketFactory(sslSocketFactory)
-                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                        .build();
-            } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                throw new BeanCreationException("Failed to create http client for ssl connection", e);
-            }
-        }
-    
-        @Bean
-        public HttpComponentsClientHttpRequestFactory sslRequestFactory() {
-            return new HttpComponentsClientHttpRequestFactory(httpClient());
+```java
+@Configuration
+public class HttpClientSslConfig {
+
+    @Bean
+    public HttpClient httpClient() {
+        try {
+            SSLContext sslcontext = SSLContexts.custom()
+                    .loadTrustMaterial(new ClassPathResource("keys/citrus.jks").getFile(), "secret".toCharArray(),
+                            new TrustSelfSignedStrategy())
+                    .build();
+
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                    sslcontext, NoopHostnameVerifier.INSTANCE);
+
+            return HttpClients.custom()
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .build();
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            throw new BeanCreationException("Failed to create http client for ssl connection", e);
         }
     }
+
+    @Bean
+    public HttpComponentsClientHttpRequestFactory sslRequestFactory() {
+        return new HttpComponentsClientHttpRequestFactory(httpClient());
+    }
+}
+```
         
 As you can see we load the keystore file **keys/citrus.jks** in order to setup the http client ssl context. In the Citrus test case you can use the client component as usual for 
 sending messages to the server.
 
-    http()
-        .client(todoClient)
-        .send()
-        .get("/todo")
-        .accept("application/xml");
-        
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK);    
+```xml
+<http:send-request client="todoClient">
+    <http:GET path="/todo">
+      <http:headers accept="application/xml"/>
+    </http:GET>
+</http:send-request>
+
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body>
+      <http:data>
+        <![CDATA[
+          <todo xmlns="http://citrusframework.org/samples/todolist">
+            <id>100</id>
+            <title>todoName</title>
+            <description>todoDescription</description>
+          </todo>
+        ]]>
+      </http:data>
+    </http:body>
+</http:receive-response>   
+```
         
 On the server side the configuration looks like follows:
         
-    <citrus-http:server id="todoSslServer"
-                        connector="sslConnector"
-                        endpoint-adapter="staticResponseAdapter"
-                        auto-start="true"/>
+```xml
+<citrus-http:server id="todoSslServer"
+                    connector="sslConnector"
+                    endpoint-adapter="staticResponseAdapter"
+                    auto-start="true"/>
 
-    <bean id="sslConnector" class="org.eclipse.jetty.server.ServerConnector">
-      <constructor-arg>
-        <bean class="org.eclipse.jetty.server.Server"></bean>
-      </constructor-arg>
-      <constructor-arg>
-        <list>
-          <bean class="org.eclipse.jetty.server.SslConnectionFactory">
-            <constructor-arg>
-              <bean class="org.eclipse.jetty.util.ssl.SslContextFactory">
-                <property name="keyStorePath" value="${project.basedir}/src/test/resources/keys/citrus.jks"/>
-                <property name="keyStorePassword" value="secret"/>
-              </bean>
-            </constructor-arg>
-            <constructor-arg value="http/1.1"/>
+<bean id="sslConnector" class="org.eclipse.jetty.server.ServerConnector">
+  <constructor-arg>
+    <bean class="org.eclipse.jetty.server.Server"></bean>
+  </constructor-arg>
+  <constructor-arg>
+    <list>
+      <bean class="org.eclipse.jetty.server.SslConnectionFactory">
+        <constructor-arg>
+          <bean class="org.eclipse.jetty.util.ssl.SslContextFactory">
+            <property name="keyStorePath" value="${project.basedir}/src/test/resources/keys/citrus.jks"/>
+            <property name="keyStorePassword" value="secret"/>
           </bean>
-          <bean class="org.eclipse.jetty.server.HttpConnectionFactory">
+        </constructor-arg>
+        <constructor-arg value="http/1.1"/>
+      </bean>
+      <bean class="org.eclipse.jetty.server.HttpConnectionFactory">
+        <constructor-arg>
+          <bean class="org.eclipse.jetty.server.HttpConfiguration">
             <constructor-arg>
               <bean class="org.eclipse.jetty.server.HttpConfiguration">
-                <constructor-arg>
-                  <bean class="org.eclipse.jetty.server.HttpConfiguration">
-                    <property name="secureScheme" value="https"/>
-                    <property name="securePort" value="8443"/>
-                  </bean>
-                </constructor-arg>
-                <property name="customizers">
-                  <list>
-                    <bean class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
-                  </list>
-                </property>
+                <property name="secureScheme" value="https"/>
+                <property name="securePort" value="8443"/>
               </bean>
             </constructor-arg>
+            <property name="customizers">
+              <list>
+                <bean class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
+              </list>
+            </property>
           </bean>
-        </list>
-      </constructor-arg>
-      <property name="port" value="8443" />
-    </bean>        
+        </constructor-arg>
+      </bean>
+    </list>
+  </constructor-arg>
+  <property name="port" value="8443" />
+</bean>        
+```
         
 That is a lot of Spring bean configuration, but it works! The server component references a special **sslConnector** bean
 that defines the certificates and on the secure port **8443**. Client now have to use the certificate in order to connect.
        
 The server component has a static endpoint adapter always sending back a Http 200 Ok response when clients connect.
 
-    <citrus:static-response-adapter id="staticResponseAdapter">
-      <citrus:payload>
-        <![CDATA[
-        <todo xmlns="http://citrusframework.org/samples/todolist">
-          <id>100</id>
-          <title>todoName</title>
-          <description>todoDescription</description>
-        </todo>
-        ]]>
-      </citrus:payload>
-    </citrus:static-response-adapter>
-       
+```xml
+<citrus:static-response-adapter id="staticResponseAdapter">
+  <citrus:payload>
+    <![CDATA[
+    <todo xmlns="http://citrusframework.org/samples/todolist">
+      <id>100</id>
+      <title>todoName</title>
+      <description>todoDescription</description>
+    </todo>
+    ]]>
+  </citrus:payload>
+</citrus:static-response-adapter>
+```       
+
 Run
 ---------
 

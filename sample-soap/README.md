@@ -13,72 +13,83 @@ endpoint for adding new entries and listing all entries.
 The sample tests show how to use this SOAP endpoint as a client. First we define the schema and a global namespace for the SOAP
 messages.
 
-    <citrus:schema-repository id="schemaRepository">
-      <citrus:schemas>
-        <citrus:schema id="todoList" location="classpath:schema/TodoList.xsd"/>
-      </citrus:schemas>
-    </citrus:schema-repository>
-        
-    <citrus:namespace-context>
-      <citrus:namespace prefix="todo" uri="http://citrusframework.org/samples/todolist"/>
-    </citrus:namespace-context>
+```xml
+<citrus:schema-repository id="schemaRepository">
+  <citrus:schemas>
+    <citrus:schema id="todoList" location="classpath:schema/TodoList.xsd"/>
+  </citrus:schemas>
+</citrus:schema-repository>
+    
+<citrus:namespace-context>
+  <citrus:namespace prefix="todo" uri="http://citrusframework.org/samples/todolist"/>
+</citrus:namespace-context>
+```
    
 The schema repository holds all known schemas in this project. Citrus will automatically check the syntax rules for incoming messages
 then. Next we need a SOAP web service client component:
 
-    <citrus-ws:client id="todoListClient"
-                      request-url="http://localhost:8080/services/ws/todolist"/>
-                          
-    <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
+```xml
+<citrus-ws:client id="todoListClient"
+                  request-url="http://localhost:8080/services/ws/todolist"/>
+                      
+<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
+```
     
 The client connects to the web service endpoint on the system under test. In addition to that we define a SOAP message factory that is
 responsible for creating the SOAP envelope. 
 
 Now we can use the web service client in the Citrus test with SOAP request and attachment.
     
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("addTodoEntry")
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"))
-        .attachment("myAttachment", "text/plain", "This is my attachment");
-        
-    soap()
-        .client(todoClient)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+```xml
+<ws:send endpoint="todoClient" soap-action="addTodoEntry">
+    <message>
+      <resource file="templates/addTodoEntryRequest.xml"/>
+    </message>
+</ws:send>
+
+<ws:receive endpoint="todoClient">
+    <message>
+      <resource file="templates/addTodoEntryResponse.xml"/>
+    </message>
+</ws:receive>
+```
         
 The Citrus test sends a request with attachment data. The attachment is transmitted as text data via Http to the server. 
 The todo-list WebService endpoint will recognize the attamchent data and add it to the todo entry. So we can expect the attachment data to be returned in
 the list of todo entries.
         
-    soap()
-        .client(todoClient)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+```xml
+<ws:send endpoint="todoClient" soap-action="getTodoList">
+    <message>
+      <resource file="templates/getTodoListRequest.xml"/>
+    </message>
+</ws:send>
 
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("getTodoList")
-        .payload(new ClassPathResource("templates/getTodoListRequest.xml"));
+<ws:receive endpoint="todoClient">
+    <message>
+      <resource file="templates/getTodoListResponse.xml"/>
+    </message>
+</ws:receive>
+```
             
 And in the expected message payload we validate the attachment data returned by the server.
             
-    <todo:getTodoListResponse xmlns:todo="http://citrusframework.org/samples/todolist">
-      <todo:list>
-        <todo:todoEntry>
-          <todo:id>@ignore@</todo:id>
-          <todo:title>${todoName}</todo:title>
-          <todo:description>${todoDescription}</todo:description>
-          <todo:attachment>
-            <todo:cid>myAttachment</todo:cid>
-            <todo:contentType>text/plain</todo:contentType>
-            <todo:data>citrus:encodeBase64('This is my attachment')</todo:data>
-          </todo:attachment>
-        </todo:todoEntry>
-      </todo:list>
-    </todo:getTodoListResponse>
+```xml
+<todo:getTodoListResponse xmlns:todo="http://citrusframework.org/samples/todolist">
+  <todo:list>
+    <todo:todoEntry>
+      <todo:id>@ignore@</todo:id>
+      <todo:title>${todoName}</todo:title>
+      <todo:description>${todoDescription}</todo:description>
+      <todo:attachment>
+        <todo:cid>myAttachment</todo:cid>
+        <todo:contentType>text/plain</todo:contentType>
+        <todo:data>citrus:encodeBase64('This is my attachment')</todo:data>
+      </todo:attachment>
+    </todo:todoEntry>
+  </todo:list>
+</todo:getTodoListResponse>
+```
         
 Run
 ---------

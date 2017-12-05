@@ -12,42 +12,64 @@ the TestNG data provider feature in terms of adding multiple todo entries within
 
 The data provider is defined in the test case.
 
-    @DataProvider(name = "todoDataProvider")
-    public Object[][] todoDataProvider() {
-        return new Object[][] {
-            new Object[] { "todo1", "Description: todo1", false },
-            new Object[] { "todo2", "Description: todo2", true },
-            new Object[] { "todo3", "Description: todo3", false }
-        };
-    }
+```java
+@DataProvider(name = "todoDataProvider")
+public Object[][] todoDataProvider() {
+    return new Object[][] {
+        new Object[] { "todo1", "Description: todo1", false },
+        new Object[] { "todo2", "Description: todo2", true },
+        new Object[] { "todo3", "Description: todo3", false }
+    };
+}
+```
     
 The provider gives us two parameters **todoName** and **todoDescription**. The parameters can be bound to test variables
 in the Citrus test with some annotation magic.
     
-    @Test(dataProvider = "todoDataProvider")
-    @CitrusTest
-    @CitrusParameters( { "todoName", "todoDescription", "done" })
-    public void testProvider(String todoName, String todoDescription, boolean done) {
-        variable("todoId", "citrus:randomUUID()");
+```java
+@Test(dataProvider = "todoDataProvider")
+@CitrusTest
+@CitrusParameters( { "todoName", "todoDescription", "done" })
+public void testProvider(String todoName, String todoDescription, boolean done) {
+}
+```
+    
+In the XML test case definition we can use the test variables coming from the data provider.    
+    
+```xml
+<actions>
+  <http:send-request client="todoClient">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/json"/>
+      <http:body type="json">
+        <http:data>
+          <![CDATA[
+            { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+          ]]>
+        </http:data>
+      </http:body>
+    </http:POST>
+  </http:send-request>
 
-        http()
-            .client(todoClient)
-            .send()
-            .post("/todolist")
-            .messageType(MessageType.JSON)
-            .contentType("application/json")
-            .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-        
-        [...]    
-    }            
+  <http:receive-response client="todoClient">
+    <http:headers status="200"/>
+    <http:body type="plaintext">
+      <http:data>${todoId}</http:data>
+    </http:body>
+  </http:receive-response>
+[...]
+</actions>                  
+```
         
 As you can see we are able to use the name and description values provided by the data provider. When executed the test performs
 multiple times with respective values:
 
-    CITRUS TEST RESULTS
-    TodoListIT.testPost([todo1, Description: todo1, false]) ............... SUCCESS
-    TodoListIT.testPost([todo2, Description: todo2, true]) ............... SUCCESS
-    TodoListIT.testPost([todo3, Description: todo3, false]) ............... SUCCESS    
+```
+CITRUS TEST RESULTS
+TodoListIT.testPost([todo1, Description: todo1, false]) ............... SUCCESS
+TodoListIT.testPost([todo2, Description: todo2, true])  ............... SUCCESS
+TodoListIT.testPost([todo3, Description: todo3, false]) ............... SUCCESS    
+```
         
 Run
 ---------

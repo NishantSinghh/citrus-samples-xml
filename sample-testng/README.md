@@ -12,80 +12,99 @@ Citrus is able to call the API methods as a client in order to validate the Http
 
 We need a Http client component in the configuration:
 
+```xml
     <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
+```
     
 In test cases we can reference this client component in order to send REST calls to the server. Citrus is able to integrate with TestNG as test execution framework. You can use
-the `TestNGCitrusTestRunner` implementation as base for your test.
+the `AbstractTestNGCitrusTest` implementation as base for your test.
     
-    public class TodoListIT extends TestNGCitrusTestRunner {
-    
-        @Autowired
-        private HttpClient todoClient;
-    
-        @Test
-        @CitrusTest
-        public void testPost() {
-            variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-            variable("todoDescription", "Description: ${todoName}");
-    
-            http(action -> action.client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=${todoName}&description=${todoDescription}"));
-    
-            http(action -> action.client(todoClient)
-                .receive()
-                .response(HttpStatus.FOUND));
-        }
-    }      
+```java
+public class TodoListIT extends AbstractTestNGCitrusTest {
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_Get_IT")
+    public void testGet() {}
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_Post_IT")
+    public void testPost() {}
+
+}      
+```
         
-The `TestNGCitrusTestRunner` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Also we need to set the annotation `@CitrusTest` on our test methods in
-addition to the normal TestNG `@Test` annotation. This way we can inject Citrus endpoints such as the `todoClient` and we can use the runner Java fluent API in Citrus to send and receive messages using that client component. 
+The `AbstractTestNGCitrusTest` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Also we need to set the annotation `@CitrusXmlTest` on our test methods in
+addition to the normal TestNG `@Test` annotation. This way we can use the XML test definition in order to send and receive messages using that client component. 
 
-As an alternative to that you can also use the test designer fluent API. You need to extend from `TestNGCitrusTestDesigner` base class then. The other concepts and configuration stays the same.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<spring:beans xmlns="http://www.citrusframework.org/schema/testcase"
+              xmlns:spring="http://www.springframework.org/schema/beans"
+              xmlns:http="http://www.citrusframework.org/schema/http/testcase"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                                  http://www.citrusframework.org/schema/testcase http://www.citrusframework.org/schema/testcase/citrus-testcase.xsd
+                                  http://www.citrusframework.org/schema/http/testcase http://www.citrusframework.org/schema/http/testcase/citrus-http-testcase.xsd">
 
-Last not least we can also use resource injection to the test methods using `@CitrusResource` method parameter annotations.
+  <testcase name="TodoList_Post_IT">
+    <meta-info>
+      <author>Citrus</author>
+      <creationdate>2017-12-04</creationdate>
+      <status>FINAL</status>
+      <last-updated-by>Citrus</last-updated-by>
+      <last-updated-on>2017-12-04T00:00:00</last-updated-on>
+    </meta-info>
 
-    public class TodoListInjectIT extends TestNGCitrusTest {
-    
-        @Autowired
-        private HttpClient todoClient;
-    
-        @Test
-        @Parameters("runner")
-        @CitrusTest
-        public void testPost(@Optional @CitrusResource TestRunner runner) {
-            runner.variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-            runner.variable("todoDescription", "Description: ${todoName}");
-    
-            runner.http(action -> action.client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=${todoName}&description=${todoDescription}"));
-    
-            runner.http(action -> action.client(todoClient)
-                .receive()
-                .response(HttpStatus.FOUND));
-        }
-    
-    }  
-  
-We can inject method parameters such as `@CitrusResource` annotated `TestRunner` that is our entrance to the Citrus Java fluent API. In TestNG we need to add the `@Optional` annotation in order to tell
-TestNG that the method parameter is not injected with TestNG but with Citrus. Also we need to give a parameter name in the `@Parameters` annotation.
+    <variables>
+      <variable name="todoName" value="citrus:concat('todo_', citrus:randomNumber(4))"/>
+      <variable name="todoDescription" value="Description: ${todoName}"/>
+    </variables>
 
-We can use the Citrus Java DSL fluent API in the TestNG test in order to exchange messages with the todo application system under test. The test is a normal TestNG test that is executable via Java IDE or command line using Maven or Gradle.
+    <actions>
+      <http:send-request client="todoClient">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/x-www-form-urlencoded"/>
+          <http:body>
+            <http:data>title=${todoName}&amp;description=${todoDescription}</http:data>
+          </http:body>
+        </http:POST>
+      </http:send-request>
+
+      <http:receive-response client="todoClient">
+        <http:headers status="302" reason-phrase="FOUND"/>
+      </http:receive-response>
+
+      <http:send-request client="todoClient">
+        <http:GET path="/todolist">
+          <http:headers accept="text/html"/>
+        </http:GET>
+      </http:send-request>
+
+      <http:receive-response client="todoClient">
+        <http:headers status="200" reason-phrase="OK"/>
+        <http:body type="xhtml">
+          <http:validate>
+            <http:xpath expression="//xh:h1" value="TODO list"/>
+            <http:xpath expression="(//xh:li[@class='list-group-item']/xh:span)[last()]" value="${todoName}"/>
+          </http:validate>
+        </http:body>
+      </http:receive-response>
+    </actions>
+  </testcase>
+</spring:beans>
+```
 
 In order to setup Maven for TestNG we need to add the dependency to the project POM file.
 
-    <dependency>
-      <groupId>testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>${testng.version}</version>
-      <scope>test</scope>
-    </dependency>    
+```xml
+<dependency>
+  <groupId>testng</groupId>
+  <artifactId>testng</artifactId>
+  <version>${testng.version}</version>
+  <scope>test</scope>
+</dependency>    
+```
        
 That completes the project setup. We are now ready to execute the tests.
        

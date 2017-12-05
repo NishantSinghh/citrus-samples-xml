@@ -12,78 +12,72 @@ Citrus is able to call the API methods as a client in order to validate the Http
 
 We need a Http client component in the configuration:
 
-    <citrus-http:client id="todoClient"
-                        request-url="http://localhost:8080"/>
+```xml
+<citrus-http:client id="todoClient"
+                    request-url="http://localhost:8080"/>
+```
     
 In test cases we can reference this client component in order to send REST calls to the server. Citrus is able to integrate with JUnit as test execution framework. You can use
-the `JUnit4CitrusTestRunner` implementation as base for your test.
+the `AbstractJUnit4CitrusTest` implementation as base for your test.
     
-    public class TodoListIT extends JUnit4CitrusTestRunner {
-    
-        @Autowired
-        private HttpClient todoClient;
-    
-        @Test
-        @CitrusTest
-        public void testPost() {
-            variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-            variable("todoDescription", "Description: ${todoName}");
-    
-            http(action -> action.client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=${todoName}&description=${todoDescription}"));
-    
-            http(action -> action.client(todoClient)
-                .receive()
-                .response(HttpStatus.FOUND));
-        }
-    }      
+```java
+public class TodoListIT extends AbstractJUnit4CitrusTest {
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_Get_IT")
+    public void testGet() {}
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_Post_IT")
+    public void testPost() {}
+
+}      
+```
         
-The `JUnit4CitrusTestRunner` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Also we need to set the annotation `@CitrusTest` on our test methods in
-addition to the normal JUnit `@Test` annotation. This way we can inject Citrus endpoints such as the `todoClient` and we can use the runner Java fluent API in Citrus to send and receive messages using that client component. 
+The `AbstractJUnit4CitrusTest` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Also we need to set the annotation `@CitrusXmlTest` on our test methods in
+addition to the normal JUnit `@Test` annotation. This way we can inject Citrus endpoints such as the `todoClient` and we can use the XML test definitions in Citrus to send and receive messages using that client component. 
 
-As an alternative to that you can also use the test designer fluent API. You need to extend from `JUnit4CitrusTestDesigner` base class then. The other concepts and configuration stays the same.
+```xml
+<http:send-request client="todoClient">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/x-www-form-urlencoded"/>
+      <http:body>
+        <http:data>title=${todoName}&amp;description=${todoDescription}</http:data>
+      </http:body>
+    </http:POST>
+</http:send-request>
 
-Last not least we can also use resource injection to the test methods using `@CitrusResource` method parameter annotations.
+<http:receive-response client="todoClient">
+    <http:headers status="302" reason-phrase="FOUND"/>
+</http:receive-response>
 
-    public class TodoListInjectIT extends JUnit4CitrusTest {
-    
-        @Autowired
-        private HttpClient todoClient;
-    
-        @Test
-        @CitrusTest
-        public void testPost(@CitrusResource TestRunner runner) {
-            runner.variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-            runner.variable("todoDescription", "Description: ${todoName}");
-    
-            runner.http(action -> action.client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=${todoName}&description=${todoDescription}"));
-    
-            runner.http(action -> action.client(todoClient)
-                .receive()
-                .response(HttpStatus.FOUND));
-        }
-    
-    }  
-  
-We can inject method parameters such as `@CitrusResource` annotated `TestRunner` that is our entrance to the Citrus Java fluent API.
+<http:send-request client="todoClient">
+    <http:GET path="/todolist">
+      <http:headers accept="text/html"/>
+    </http:GET>
+</http:send-request>
 
-We can use the Citrus Java DSL fluent API in the JUnit test in order to exchange messages with the todo application system under test. The test is a normal JUnit test that is executable via Java IDE or command line using Maven or Gradle.
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body type="xhtml">
+      <http:validate>
+        <http:xpath expression="//xh:h1" value="TODO list"/>
+        <http:xpath expression="(//xh:li[@class='list-group-item']/xh:span)[last()]" value="${todoName}"/>
+      </http:validate>
+    </http:body>
+</http:receive-response>
+```
 
 In order to setup Maven for JUnit we need to add the dependency to the project POM file.
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>    
+```xml
+<dependency>
+  <groupId>junit</groupId>
+  <artifactId>junit</artifactId>
+  <version>${junit.version}</version>
+  <scope>test</scope>
+</dependency>    
+```
        
 That completes the project setup. We are now ready to execute the tests.
        

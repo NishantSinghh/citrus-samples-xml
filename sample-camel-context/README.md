@@ -12,51 +12,89 @@ You can also simulate the Camel route endpoint with receiving messages and provi
 
 So we need a Camel route to test.
 
-    <!-- Apache Camel context with route to test -->
-    <camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
-      <route id="newsRoute">
-        <from uri="jms:queue:JMS.Queue.News"/>
-        <to uri="log:com.consol.citrus.camel?level=INFO"/>
-        <to uri="spring-ws:http://localhost:18009?soapAction=newsFeed"/>
-      </route>
-    </camelContext>
+```xml
+<!-- Apache Camel context with route to test -->
+<camelContext id="camelContext" xmlns="http://camel.apache.org/schema/spring">
+  <route id="newsRoute">
+    <from uri="jms:queue:JMS.Queue.News"/>
+    <to uri="log:com.consol.citrus.camel?level=INFO"/>
+    <to uri="spring-ws:http://localhost:18009?soapAction=newsFeed"/>
+  </route>
+</camelContext>
+```
 
 The Camel route reads from a JMS queue and forwards the message to a SOAP web service endpoint. In a test scenario we need to send messages to the JMS destination and wait for messages on
 the SOAP server endpoint. Lets add configuration for this in Citrus:
 
-    <!-- JMS endpoint -->
-    <citrus-jms:endpoint id="newsJmsEndpoint"
-                       destination-name="JMS.Queue.News"
-                       timeout="5000"/>
+```xml
+<!-- JMS endpoint -->
+<citrus-jms:endpoint id="newsJmsEndpoint"
+                   destination-name="JMS.Queue.News"
+                   timeout="5000"/>
 
-    <!-- SOAP WebService server-->
-    <citrus-ws:server id="newsSoapServer"
-                    port="18009"
-                    auto-start="true"
-                    timeout="10000"/>
+<!-- SOAP WebService server-->
+<citrus-ws:server id="newsSoapServer"
+                port="18009"
+                auto-start="true"
+                timeout="10000"/>
+```
        
 The components above are used in a Citrus test case.
        
-    @Test
-    public class NewsFeedIT extends TestNGCitrusTestDesigner {
-    
-        @CitrusTest(name = "NewsFeed_Ok_IT")
-        public void newsFeed_Ok_Test() {
-            send("newsJmsEndpoint")
-                    .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                                "<nf:Message>Citrus rocks!</nf:Message>" +
-                            "</nf:News>");
-    
-            receive("newsSoapServer")
-                    .payload("<nf:News xmlns:nf=\"http://citrusframework.org/schemas/samples/news\">" +
-                                "<nf:Message>Citrus rocks!</nf:Message>" +
-                            "</nf:News>")
-                    .header(SoapMessageHeaders.SOAP_ACTION, "newsFeed");
-    
-            send("newsSoapServer")
-                    .header(SoapMessageHeaders.HTTP_STATUS_CODE, "200");
-        }
-    }
+```xml
+<testcase name="NewsFeed_Ok_IT">
+  <actions>
+    <echo>
+      <message>Send JMS request message to queue destination</message>
+    </echo>
+
+    <http:send-request client="newsJmsEndpoint">
+      <http:POST>
+        <http:headers>
+          <http:header name="Operation" value="HelloService/sayHello"/>
+        </http:headers>
+        <http:body>
+          <http:data>
+            <![CDATA[
+              <nf:News xmlns:nf="http://citrusframework.org/schemas/samples/news">
+                <nf:Message>Citrus rocks!</nf:Message>
+              </nf:News>
+            ]]>
+          </http:data>
+        </http:body>
+      </http:POST>
+    </http:send-request>
+
+    <echo>
+      <message>Receive JMS message on queue destination</message>
+    </echo>
+
+    <http:receive-request server="newsSoapServer">
+      <http:POST>
+        <http:headers>
+          <http:header name="citrus_soap_action" value="newsFeed"/>
+        </http:headers>
+        <http:body>
+          <http:data>
+            <![CDATA[
+              <nf:News xmlns:nf="http://citrusframework.org/schemas/samples/news">
+                <nf:Message>Citrus rocks!</nf:Message>
+              </nf:News>
+            ]]>
+          </http:data>
+        </http:body>
+      </http:POST>
+    </http:receive-request>
+
+    <http:send-response server="newsSoapServer">
+      <http:headers status="200"/>
+      <http:body>
+        <http:data></http:data>
+      </http:body>
+    </http:send-response>
+  </actions>
+</testcase>
+```
        
 As you can see Citrus is both JMS message producer and SOAP server at the same time in a single test. The Apache Camel route in the middle will read the JMS message and forward it to the SOAP
 server endpoint where Citrus receives the message for validation purpose. This way we make sure the Camel route is working as expected.

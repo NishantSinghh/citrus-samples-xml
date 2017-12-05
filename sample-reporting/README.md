@@ -45,9 +45,10 @@ You can review the complete custom reporter on this sample's [github repository]
 
 We add the new reporter implementation as Spring bean to the application context.
     
-```xml    
+```xml
 <bean class="com.consol.citrus.samples.todolist.reporting.ExtentReporter"/>
 ```
+
         
 That completes the reporting extension. Citrus will automatically see the new bean and add it to the list of reporters. The reporter is called when tests pass and fail. 
 As a result the reporter writes Extent styled Html reports to the folder `target/citrus-reports/extent-reports.html` when Citrus tests are executed.
@@ -57,9 +58,11 @@ property file to the sample sources in [resources/citrus-application.properties]
 
 The file contains some property settings that customize the default Citrus Html reporting.
 
-    citrus.html.report.directory=target/citrus-reports
-    citrus.html.report.file=citrus-reports.html
-    citrus.html.report.logo:classpath:logo/reporting-logo.png
+```properties
+citrus.html.report.directory=target/citrus-reports
+citrus.html.report.file=citrus-reports.html
+citrus.html.report.logo:classpath:logo/reporting-logo.png
+```
     
 The tests now write default Html reports to the file `target/citrus-reports/citrus-reports.html`. Also we use a custom reporting logo that is automatically added to the reporting page header. 
 You can now execute the tests in this sample and review the reports.    

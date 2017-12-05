@@ -14,39 +14,49 @@ to the todo entries.
 The sample tests show how to use this SOAP endpoint as a client. First we define the schema and a global namespace for the SOAP
 messages.
 
-    <citrus:schema-repository id="schemaRepository">
-      <citrus:schemas>
-        <citrus:schema id="todoList" location="classpath:schema/TodoList.xsd"/>
-      </citrus:schemas>
-    </citrus:schema-repository>
-        
-    <citrus:namespace-context>
-      <citrus:namespace prefix="todo" uri="http://citrusframework.org/samples/todolist"/>
-    </citrus:namespace-context>
+```xml
+<citrus:schema-repository id="schemaRepository">
+  <citrus:schemas>
+    <citrus:schema id="todoList" location="classpath:schema/TodoList.xsd"/>
+  </citrus:schemas>
+</citrus:schema-repository>
+    
+<citrus:namespace-context>
+  <citrus:namespace prefix="todo" uri="http://citrusframework.org/samples/todolist"/>
+</citrus:namespace-context>
+```
    
 The schema repository holds all known schemas in this project. Citrus will automatically check the syntax rules for incoming messages
 then. Next we need a SOAP web service client component:
 
-    <citrus-ws:client id="todoListClient"
-                      request-url="http://localhost:8080/services/ws/todolist"/>
-                          
-    <bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
+```xml
+<citrus-ws:client id="todoListClient"
+                  request-url="http://localhost:8080/services/ws/todolist"/>
+                      
+<bean id="messageFactory" class="org.springframework.ws.soap.saaj.SaajSoapMessageFactory"/>
+```
     
 The client connects to the web service endpoint on the system under test. In addition to that we define a SOAP message factory that is
 responsible for creating the SOAP envelope. 
 
 Now we can use the web service client in the Citrus test.
     
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("addTodoEntry")
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
-        
-    soap()
-        .client(todoClient)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+```xml
+<ws:send endpoint="todoClient" soap-action="addTodoEntry">
+    <message>
+      <resource file="templates/addTodoEntryRequest.xml"/>
+    </message>
+    <ws:attachment content-id="myAttachment" content-type="text/plain">
+      <ws:data>This is my attachment</ws:data>
+    </ws:attachment>
+</ws:send>
+
+<ws:receive endpoint="todoClient">
+    <message>
+      <resource file="templates/addTodoEntryResponse.xml"/>
+    </message>
+</ws:receive>
+```
         
 The Citrus test sends a request and validates the SOAP response message. The message payload is loaded from external file resources.        
         

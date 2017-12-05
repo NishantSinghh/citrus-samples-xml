@@ -12,74 +12,113 @@ Citrus is able to call the API methods as a client in order to validate the Http
 
 We need a Http client component in the configuration:
 
-    <citrus-http:client id="todoClient"
-                        request-url="http://localhost:8080"/>
+```xml
+<citrus-http:client id="todoClient"
+                    request-url="http://localhost:8080"/>
+```
     
 In test cases we can reference this client component in order to send REST calls to the server. In JUnit5 we can use the `@ExtendsWith` annotation that loads the
 `CitrusExtension` in JUnit5.
     
-    @ExtendWith(CitrusExtension.class)
-    public class TodoListIT {
-    
-        @CitrusEndpoint
-        private HttpClient todoClient;
-    
-        @Test
-        @CitrusTest
-        void testPost(@CitrusResource TestRunner runner) {
-            http(action -> action.client(todoClient)
-                .send()
-                .post("/todolist")
-                .contentType("application/x-www-form-urlencoded")
-                .payload("title=${todoName}&description=${todoDescription}"));
-                
-            http(action -> action.client(todoClient)
-                .receive()
-                .response(HttpStatus.OK));  
-        }
-    }  
-        
-The `CitrusExtension` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Then we can inject method parameters such as `@CitrusResource` annotated `TestRunner` that is
-our entrance to the Citrus Java fluent API. The runner is then able to use the `httpClient` which is automatically injected via `@CitrusEndpoint` annotation as a class field member.
+```java
+@ExtendWith(CitrusBaseExtension.class)
+public class TodoListIT {
 
-We can use the Citrus Java DSL fluent API in the JUnit5 test in order to exchange messages with the todo application system under test. The test is a normal JUnit5 test that is executable via Java IDE or command line using Maven or Gradle.
+    @Test
+    @CitrusXmlTest(name = "TodoList_Get_IT")
+    public void testGet() {}
+
+    @Test
+    @CitrusXmlTest(name = "TodoList_Post_IT")
+    public void testPost() {}
+
+}  
+```
+        
+The `CitrusExtension` makes sure that Citrus framework is loaded at startup and all configuration is done properly. Then we can use the Citrus XML test definitions for defining the test case logic.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<spring:beans xmlns="http://www.citrusframework.org/schema/testcase"
+              xmlns:spring="http://www.springframework.org/schema/beans"
+              xmlns:http="http://www.citrusframework.org/schema/http/testcase"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                                  http://www.citrusframework.org/schema/testcase http://www.citrusframework.org/schema/testcase/citrus-testcase.xsd
+                                  http://www.citrusframework.org/schema/http/testcase http://www.citrusframework.org/schema/http/testcase/citrus-http-testcase.xsd">
+
+  <testcase name="TodoList_Post_IT">
+    <meta-info>
+      <author>Citrus</author>
+      <creationdate>2017-12-04</creationdate>
+      <status>FINAL</status>
+      <last-updated-by>Citrus</last-updated-by>
+      <last-updated-on>2017-12-04T00:00:00</last-updated-on>
+    </meta-info>
+
+    <variables>
+      <variable name="todoName" value="citrus:concat('todo_', citrus:randomNumber(4))"/>
+      <variable name="todoDescription" value="Description: ${todoName}"/>
+    </variables>
+
+    <actions>
+      <http:send-request client="todoClient">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/x-www-form-urlencoded"/>
+          <http:body>
+            <http:data>title=${todoName}&amp;description=${todoDescription}</http:data>
+          </http:body>
+        </http:POST>
+      </http:send-request>
+
+      <http:receive-response client="todoClient">
+        <http:headers status="302" reason-phrase="FOUND"/>
+      </http:receive-response>
+    </actions>
+  </testcase>
+</spring:beans>
+```
 
 In order to setup Maven for JUnit5 we need to configure the `maven-failsafe-plugin` with the JUnit platform.
 
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.19.1</version>
-        <configuration>
-          <forkCount>1</forkCount>
-        </configuration>
-        <executions>
-          <execution>
-            <id>integration-tests</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${junit.platform.version}</version>
-          </dependency>
-        </dependencies>
-    </plugin>
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-failsafe-plugin</artifactId>
+    <version>2.19.1</version>
+    <configuration>
+      <forkCount>1</forkCount>
+    </configuration>
+    <executions>
+      <execution>
+        <id>integration-tests</id>
+        <goals>
+          <goal>integration-test</goal>
+          <goal>verify</goal>
+        </goals>
+      </execution>
+    </executions>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-surefire-provider</artifactId>
+        <version>${junit.platform.version}</version>
+      </dependency>
+    </dependencies>
+</plugin>
+```
     
 In addition to that we need the JUnit dependency in test scope in our project:
 
-    <!-- Test scoped dependencies -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>    
+```xml
+<!-- Test scoped dependencies -->
+<dependency>
+  <groupId>org.junit.jupiter</groupId>
+  <artifactId>junit-jupiter-engine</artifactId>
+  <version>${junit.version}</version>
+  <scope>test</scope>
+</dependency>    
+```
        
 That completes the project setup. We are now ready to execute the tests.
        

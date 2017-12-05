@@ -53,7 +53,7 @@
         <http:headers status="200"/>
         <http:body type="json">
           <http:validate>
-            <http:json-path expression="$.keySet()" value="@assertThat(hasSize(4))@"/>
+            <http:json-path expression="$.keySet()" value="@assertThat(hasItems(id,title,description,done))@"/>
             <http:json-path expression="$.id" value="@assertThat(equalTo(${todoId}))@"/>
             <http:json-path expression="$.title" value="@assertThat(allOf(startsWith(todo_), endsWith(${todoId})))@"/>
             <http:json-path expression="$.description" value="@assertThat(anyOf(startsWith(Description:), nullValue()))@"/>

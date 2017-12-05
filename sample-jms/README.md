@@ -12,18 +12,31 @@ We can send JSON messages in order to create new todo entries that are stored to
 
 The Citrus project needs a JMS connection factory that is defined in the Spring application context as bean:
 
-    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-      <property name="brokerURL" value="tcp://localhost:61616" />
-    </bean>
+```xml
+<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+  <property name="brokerURL" value="tcp://localhost:61616" />
+</bean>
+```
     
 We use ActiveMQ as message broker so we use the respective connection factory implementation here. The message broker is automatically
 started with the Maven build lifecycle.
     
 No we can add a new todo entry by sending a JSON message to the JMS queue destination.
     
-    send(todoJmsEndpoint)
-        .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-        .payload("{ \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+```xml
+<send endpoint="todoJmsEndpoint">
+    <message type="binary">
+      <data>
+        <![CDATA[
+          { "title": "${todoName}", "description": "${todoDescription}", "done": ${done} }
+        ]]>
+      </data>
+    </message>
+    <header>
+      <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+    </header>
+</send>
+```
         
 We have to add a special message header **_type** which is required by the system under test for message conversion. The message payload
 is the JSON representation of a todo entry model object.

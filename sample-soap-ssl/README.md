@@ -12,44 +12,48 @@ keystore that holds the supported certificates. The sample uses the keystore in 
 
 We need a special Soap client configuration:
 
-    <bean class="com.consol.citrus.samples.todolist.config.SoapClientSslConfig"/>
+```xml
+<bean class="com.consol.citrus.samples.todolist.config.SoapClientSslConfig"/>
 
-    <citrus-ws:client id="todoClient"
-                        message-sender="sslRequestMessageSender"
-                        request-url="https://localhost:8443"/>
+<citrus-ws:client id="todoClient"
+                    message-sender="sslRequestMessageSender"
+                    request-url="https://localhost:8443"/>
+```
     
 The client component references a special request message sender and uses the transport scheme **https** on port **8443**. The SSL request message sender is defined in a
 Java Spring configuration class simply because it is way more comfortable to do this in Java than in XML.
     
-    @Configuration
-    public class SoapClientSslConfig {
-    
-        @Bean
-        public HttpClient httpClient() {
-            try {
-                SSLContext sslcontext = SSLContexts.custom()
-                        .loadTrustMaterial(new ClassPathResource("keys/citrus.jks").getFile(), "secret".toCharArray(),
-                                new TrustSelfSignedStrategy())
-                        .build();
-    
-                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                        sslcontext, NoopHostnameVerifier.INSTANCE);
-    
-                return HttpClients.custom()
-                        .setSSLSocketFactory(sslSocketFactory)
-                        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
-                        .addInterceptorFirst(new HttpComponentsMessageSender.RemoveSoapHeadersInterceptor())
-                        .build();
-            } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                throw new BeanCreationException("Failed to create http client for ssl connection", e);
-            }
-        }
-    
-        @Bean
-        public HttpComponentsMessageSender sslRequestMessageSender() {
-            return new HttpComponentsMessageSender(httpClient());
+```java
+@Configuration
+public class SoapClientSslConfig {
+
+    @Bean
+    public HttpClient httpClient() {
+        try {
+            SSLContext sslcontext = SSLContexts.custom()
+                    .loadTrustMaterial(new ClassPathResource("keys/citrus.jks").getFile(), "secret".toCharArray(),
+                            new TrustSelfSignedStrategy())
+                    .build();
+
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
+                    sslcontext, NoopHostnameVerifier.INSTANCE);
+
+            return HttpClients.custom()
+                    .setSSLSocketFactory(sslSocketFactory)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                    .addInterceptorFirst(new HttpComponentsMessageSender.RemoveSoapHeadersInterceptor())
+                    .build();
+        } catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            throw new BeanCreationException("Failed to create http client for ssl connection", e);
         }
     }
+
+    @Bean
+    public HttpComponentsMessageSender sslRequestMessageSender() {
+        return new HttpComponentsMessageSender(httpClient());
+    }
+}
+```
         
 **Note**
 We have to add the **HttpComponentsMessageSender.RemoveSoapHeadersInterceptor()** as interceptor to the http client. This prevents that content length headers get set several times which
@@ -58,75 +62,84 @@ is not allowed.
 As you can see we load the keystore file **keys/citrus.jks** in order to setup the http client ssl context. In the Citrus test case you can use the client component as usual for 
 sending messages to the server.
 
-    soap()
-        .client(todoClient)
-        .send()
-        .soapAction("addTodoEntry")
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
+```xml
+<ws:send endpoint="todoClient" fork="true" soap-action="addTodoEntry">
+    <message>
+      <resource file="templates/addTodoEntryRequest.xml"/>
+    </message>
+</ws:send>
 
-    soap()
-        .client(todoClient)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));    
+<ws:receive endpoint="todoClient">
+    <message>
+      <resource file="templates/addTodoEntryResponse.xml"/>
+    </message>
+</ws:receive>    
+```
         
 On the server side the configuration looks like follows:
         
-    <citrus-ws:server id="todoSslServer"
-                        connector="sslConnector"
-                        auto-start="true"
-                        timeout="5000"/>
+```xml
+<citrus-ws:server id="todoSslServer"
+                    connector="sslConnector"
+                    auto-start="true"
+                    timeout="5000"/>
 
-    <bean id="sslConnector" class="org.eclipse.jetty.server.ServerConnector">
-      <constructor-arg>
-        <bean class="org.eclipse.jetty.server.Server"></bean>
-      </constructor-arg>
-      <constructor-arg>
-        <list>
-          <bean class="org.eclipse.jetty.server.SslConnectionFactory">
-            <constructor-arg>
-              <bean class="org.eclipse.jetty.util.ssl.SslContextFactory">
-                <property name="keyStorePath" value="${project.basedir}/src/test/resources/keys/citrus.jks"/>
-                <property name="keyStorePassword" value="secret"/>
-              </bean>
-            </constructor-arg>
-            <constructor-arg value="http/1.1"/>
+<bean id="sslConnector" class="org.eclipse.jetty.server.ServerConnector">
+  <constructor-arg>
+    <bean class="org.eclipse.jetty.server.Server"></bean>
+  </constructor-arg>
+  <constructor-arg>
+    <list>
+      <bean class="org.eclipse.jetty.server.SslConnectionFactory">
+        <constructor-arg>
+          <bean class="org.eclipse.jetty.util.ssl.SslContextFactory">
+            <property name="keyStorePath" value="${project.basedir}/src/test/resources/keys/citrus.jks"/>
+            <property name="keyStorePassword" value="secret"/>
           </bean>
-          <bean class="org.eclipse.jetty.server.HttpConnectionFactory">
+        </constructor-arg>
+        <constructor-arg value="http/1.1"/>
+      </bean>
+      <bean class="org.eclipse.jetty.server.HttpConnectionFactory">
+        <constructor-arg>
+          <bean class="org.eclipse.jetty.server.HttpConfiguration">
             <constructor-arg>
               <bean class="org.eclipse.jetty.server.HttpConfiguration">
-                <constructor-arg>
-                  <bean class="org.eclipse.jetty.server.HttpConfiguration">
-                    <property name="secureScheme" value="https"/>
-                    <property name="securePort" value="8443"/>
-                  </bean>
-                </constructor-arg>
-                <property name="customizers">
-                  <list>
-                    <bean class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
-                  </list>
-                </property>
+                <property name="secureScheme" value="https"/>
+                <property name="securePort" value="8443"/>
               </bean>
             </constructor-arg>
+            <property name="customizers">
+              <list>
+                <bean class="org.eclipse.jetty.server.SecureRequestCustomizer"/>
+              </list>
+            </property>
           </bean>
-        </list>
-      </constructor-arg>
-      <property name="port" value="8443" />
-    </bean>        
+        </constructor-arg>
+      </bean>
+    </list>
+  </constructor-arg>
+  <property name="port" value="8443" />
+</bean>        
+```
         
 That is a lot of Spring bean configuration, but it works! The server component references a special **sslConnector** bean
 that defines the certificates and on the secure port **8443**. Client now have to use the certificate in order to connect.
        
 In the test case we can receive the requests and provide proper response messages as usual.
 
-    soap()
-        .server(todoServer)
-        .receive()
-        .payload(new ClassPathResource("templates/addTodoEntryRequest.xml"));
+```xml
+<ws:receive endpoint="todoSslServer">
+    <message>
+      <resource file="templates/addTodoEntryRequest.xml"/>
+    </message>
+</ws:receive>
 
-    soap()
-        .server(todoServer)
-        .send()
-        .payload(new ClassPathResource("templates/addTodoEntryResponse.xml"));
+<ws:send endpoint="todoSslServer">
+    <message>
+      <resource file="templates/addTodoEntryResponse.xml"/>
+    </message>
+</ws:send>
+```
        
 Run
 ---------

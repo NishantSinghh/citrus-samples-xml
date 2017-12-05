@@ -8,88 +8,97 @@ Objectives
 
 In this sample project we want to configure both Http client and server to use basic authentication. On client side we can add the basic authentication header manually in each send operation.
 
-    http()
-        .client(todoClient)
-        .send()
-        .get("/todo")
-        .accept("application/xml")
-        .header("Authorization", "Basic citrus:encodeBase64('citrus:secr3t')");
+```xml
+<http:send-request client="todoClient">
+    <http:GET path="/todo">
+      <http:headers accept="application/xml">
+        <http:header name="Authorization" value="Basic citrus:encodeBase64('citrus:secr3t')"/>
+      </http:headers>
+    </http:GET>
+</http:send-request>
+```
         
 The `Authorization` header is holding the username password combination as base64 encoded string. We need to add this header manually to the send operation. The server will verify the username password
 before the request is processed. This is an easy way to add basic authentication information to a request in Citrus. On the downside we have to manually add the authentication header in each send operation.
 
 Fortunately we can also add the basic authentication to the client component. So all requests with this client will automatically add the proper authentication header. We need a special Http client configuration for that:
 
-    <citrus-http:client id="todoBasicAuthClient"
-                          request-url="http://localhost:8090"
-                          request-factory="basicAuthFactory"/>
-    
-    <bean id="basicAuthFactory"
-          class="com.consol.citrus.http.client.BasicAuthClientHttpRequestFactory">
-      <property name="authScope">
-        <bean class="org.apache.http.auth.AuthScope">
-          <constructor-arg value="localhost"/>
-          <constructor-arg value="8090"/>
-          <constructor-arg value=""/>
-          <constructor-arg value="basic"/>
-        </bean>
-      </property>
-      <property name="credentials">
-        <bean class="org.apache.http.auth.UsernamePasswordCredentials">
-          <constructor-arg value="citrus"/>
-          <constructor-arg value="secr3t"/>
-        </bean>
-      </property>
+```xml
+<citrus-http:client id="todoBasicAuthClient"
+                      request-url="http://localhost:8090"
+                      request-factory="basicAuthFactory"/>
+
+<bean id="basicAuthFactory"
+      class="com.consol.citrus.http.client.BasicAuthClientHttpRequestFactory">
+  <property name="authScope">
+    <bean class="org.apache.http.auth.AuthScope">
+      <constructor-arg value="localhost"/>
+      <constructor-arg value="8090"/>
+      <constructor-arg value=""/>
+      <constructor-arg value="basic"/>
     </bean>
+  </property>
+  <property name="credentials">
+    <bean class="org.apache.http.auth.UsernamePasswordCredentials">
+      <constructor-arg value="citrus"/>
+      <constructor-arg value="secr3t"/>
+    </bean>
+  </property>
+</bean>
+```
     
 The client component references a special request factory of type `BasicAuthClientHttpRequestFactory`. The request factory receives the username password credentials and is defined as bean in the
 Spring configuration. Now all send operations that reference this client component will automatically use basic authentication. 
     
 On the server side the configuration looks like follows:
         
-    <citrus-http:server id="basicAuthHttpServer"
-                            port="8090"
-                            endpoint-adapter="staticResponseAdapter"
-                            security-handler="basicAuthSecurityHandler"
-                            auto-start="true"/>
-    
-    <bean id="basicAuthSecurityHandler" class="com.consol.citrus.http.security.SecurityHandlerFactory">
-      <property name="users">
-        <list>
-          <bean class="com.consol.citrus.http.security.User">
-            <property name="name" value="citrus"/>
-            <property name="password" value="secr3t"/>
-            <property name="roles" value="CitrusRole"/>
-          </bean>
-        </list>
-      </property>
-      <property name="constraints">
-        <map>
-          <entry key="/todo/*">
-            <bean class="com.consol.citrus.http.security.BasicAuthConstraint">
-              <constructor-arg value="CitrusRole"/>
-            </bean>
-          </entry>
-        </map>
-      </property>
-    </bean>        
+```xml
+<citrus-http:server id="basicAuthHttpServer"
+                        port="8090"
+                        endpoint-adapter="staticResponseAdapter"
+                        security-handler="basicAuthSecurityHandler"
+                        auto-start="true"/>
+
+<bean id="basicAuthSecurityHandler" class="com.consol.citrus.http.security.SecurityHandlerFactory">
+  <property name="users">
+    <list>
+      <bean class="com.consol.citrus.http.security.User">
+        <property name="name" value="citrus"/>
+        <property name="password" value="secr3t"/>
+        <property name="roles" value="CitrusRole"/>
+      </bean>
+    </list>
+  </property>
+  <property name="constraints">
+    <map>
+      <entry key="/todo/*">
+        <bean class="com.consol.citrus.http.security.BasicAuthConstraint">
+          <constructor-arg value="CitrusRole"/>
+        </bean>
+      </entry>
+    </map>
+  </property>
+</bean>        
+```
         
 The server component references a special **security-handler** bean of type `SecurityHandlerFactory`. The security handler also uses a user definition with username password credentials as well as a `BasicAuthConstraint`. 
 Clients now have to use the basic authentication in order to connect with this server. Unauthorized requests will be answered with `401 Unauthorized`.
        
 The server component has a static endpoint adapter always sending back a Http 200 Ok response when clients connect.
 
-    <citrus:static-response-adapter id="staticResponseAdapter">
-      <citrus:payload>
-        <![CDATA[
-        <todo xmlns="http://citrusframework.org/samples/todolist">
-          <id>100</id>
-          <title>todoName</title>
-          <description>todoDescription</description>
-        </todo>
-        ]]>
-      </citrus:payload>
-    </citrus:static-response-adapter>
+```xml
+<citrus:static-response-adapter id="staticResponseAdapter">
+  <citrus:payload>
+    <![CDATA[
+    <todo xmlns="http://citrusframework.org/samples/todolist">
+      <id>100</id>
+      <title>todoName</title>
+      <description>todoDescription</description>
+    </todo>
+    ]]>
+  </citrus:payload>
+</citrus:static-response-adapter>
+```
        
 Run
 ---------

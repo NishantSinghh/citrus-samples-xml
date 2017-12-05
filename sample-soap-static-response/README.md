@@ -13,7 +13,7 @@ Objectives
 We want to have a server component that provides a static response message to calling clients. Depending on the requested resource path the server
 should provide different response messages. we can do this in Citrus with a little bit of Spring bean configuration:
 
-```
+```xml
 <citrus-ws:server id="todoListServer"
               port="8080"
               auto-start="true"
@@ -29,7 +29,7 @@ The *todoListServer* is a normal server component in Citrus. The endpoint-adapte
 The server uses a **dispatchingEndpointAdapter**. This endpoint adapter implementation uses a mapping key extractor and a mapping strategy in order to map incoming requests to response generating
 adapters.
 
-```
+```xml
 <bean id="mappingKeyExtractor" class="com.consol.citrus.endpoint.adapter.mapping.SoapActionMappingKeyExtractor"/>
 
 <bean id="mappingStrategy" class="com.consol.citrus.endpoint.adapter.mapping.SimpleMappingStrategy">
@@ -46,7 +46,7 @@ The mapping key extractor implementation evaluates the SOAP action header. Depen
 mapping strategy maps incoming requests to different response generating adapter implementations. Here in this example we define **getTodo** and **getTodoList** actions with response
 adapters.
 
-```
+```xml
 <citrus:static-response-adapter id="todoResponseAdapter">
     <citrus:payload>
         <![CDATA[

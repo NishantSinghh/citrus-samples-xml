@@ -12,24 +12,31 @@ Citrus is able to call the API methods as a client in order to validate the Http
 
 We need a Http client component in the configuration:
 
+```xml
     <citrus-http:client id="todoClient"
                         request-url="http://localhost:8080"/>
+```
     
 In test cases we can reference this client component in order to send REST calls to the server.
     
-    http()
-        .client(todoClient)
-        .send()
-        .post("/todolist")
-        .contentType("application/x-www-form-urlencoded")
-        .payload("title=${todoName}&description=${todoDescription}");
+```xml
+<http:send-request client="todoClient">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/x-www-form-urlencoded"/>
+      <http:body>
+        <http:data>title=${todoName}&amp;description=${todoDescription}</http:data>
+      </http:body>
+    </http:POST>
+</http:send-request>
+```
         
 As you can see we are able to send **x-www-form-urlencoded** message content as **POST** request. The response is then validated as **Http 200 OK**.
 
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK);
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="302" reason-phrase="FOUND"/>
+</http:receive-response>
+```
         
 Run
 ---------

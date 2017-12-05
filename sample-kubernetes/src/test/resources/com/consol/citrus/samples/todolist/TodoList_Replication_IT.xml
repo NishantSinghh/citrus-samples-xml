@@ -66,6 +66,20 @@
         </k8s:validate>
       </k8s:list-pods>
 
+      <parallel>
+        <k8s:watch-pods client="k8sClient" namespace="default" name="${todoPod}">
+          <k8s:validate>
+            <k8s:element path="$.action" value="MODIFIED"/>
+          </k8s:validate>
+        </k8s:watch-pods>
+
+        <k8s:delete-pod client="k8sClient" namespace="default" name="${todoPod}">
+          <k8s:validate>
+            <k8s:element path="$.result.success" value="true"/>
+          </k8s:validate>
+        </k8s:delete-pod>
+      </parallel>
+
       <sleep milliseconds="2000"/>
 
       <stop-timer timerId="createTodoItems"/>

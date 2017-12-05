@@ -13,76 +13,107 @@ We call this API and receive XML message structures for validation in our test c
 As we want to deal with XML data it is a good idea to enable schema validation for incoming messages. Just put your
 known schemas to the schema repository and Citrus will automatically validate incoming messages with the available schema rules.
 
-    <citrus:schema-repository id="schemaRepository">
-        <citrus:schemas>
-            <citrus:schema id="todo" location="classpath:schema/Todo.xsd"/>
-        </citrus:schemas>
-    </citrus:schema-repository>
+```xml
+<citrus:schema-repository id="schemaRepository">
+    <citrus:schemas>
+        <citrus:schema id="todo" location="classpath:schema/Todo.xsd"/>
+    </citrus:schemas>
+</citrus:schema-repository>
+```
 
 That is all for configuration, now we can use XML as message payload in the test cases.
     
-    http()
-        .client(todoClient)
-        .send()
-        .post("/todolist")
-        .contentType("application/xml")
-        .payload("<todo>" +
-                     "<id>${todoId}</id>" +
-                     "<title>${todoName}</title>" +
-                     "<description>${todoDescription}</description>" +
-                 "</todo>");
+```xml
+<http:send-request client="todoClient">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/xml"/>
+      <http:body>
+        <http:payload>
+          <t:todo xmlns:t="http://citrusframework.org/samples/todolist">
+            <t:id>${todoId}</t:id>
+            <t:title>${todoName}</t:title>
+            <t:description>${todoDescription}</t:description>
+          </t:todo>
+        </http:payload>
+      </http:body>
+    </http:POST>
+</http:send-request>
+```
         
 As you can see we are able to send the XML data as payload. You can add test variables in message payloads. In a receive 
 action we are able to use an expected XML message payload. Citrus performs a XML tree comparison where each element is checked to meet
 the expected values.
 
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .payload("<todo>" +
-                     "<id>${todoId}</id>" +
-                     "<title>${todoName}</title>" +
-                     "<description>${todoDescription}</description>" +
-                 "</todo>");
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body>
+      <http:payload>
+        <t:todo xmlns:t="http://citrusframework.org/samples/todolist">
+          <t:id>${todoId}</t:id>
+          <t:title>${todoName}</t:title>
+          <t:description>${todoDescription}</t:description>
+          <t:done>false</t:done>
+        </t:todo>
+      </http:payload>
+    </http:body>
+</http:receive-response>
+```
 
 The XMl message payload can be difficult to read when used as String concatenation. Fortunately we can also use file resources as message
 payloads.
 
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .payload(new ClassPathResource("templates/todo.xml"));    
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body>
+      <http:resource file="templates/todo.xml"/>
+    </http:body>
+</http:receive-response>    
+```
         
 An alternative approach would be to use Xpath expressions when validating incoming XML messages.
 
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .validate("/t:todo/t:id", "${todoId}")
-        .validate("/t:todo/t:title", "${todoName}")
-        .validate("/t:todo/t:description", "${todoDescription}");
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body>
+      <http:validate>
+        <http:xpath expression="/t:todo/t:id" value="${todoId}"/>
+        <http:xpath expression="/t:todo/t:title" value="${todoName}"/>
+        <http:xpath expression="/t:todo/t:description" value="${todoDescription}"/>
+        <http:xpath expression="/t:todo/t:done" value="false"/>
+      </http:validate>
+    </http:body>
+</http:receive-response>
+```
         
 Each expression is evaluated and checked for expected values. XPath is namespace sensitive. So we need to use the correct namespaces
 in the expressions. Here we have used a namespace prefix ***t:***. This prefix is defined in a central namespace context in the configuration.
        
-    <citrus:namespace-context>
-        <citrus:namespace prefix="t" uri="http://citrusframework.org/samples/todolist"/>
-    </citrus:namespace-context>
+```xml
+<citrus:namespace-context>
+    <citrus:namespace prefix="t" uri="http://citrusframework.org/samples/todolist"/>
+</citrus:namespace-context>
+```
        
 This makes sure that the Xpath expressions are able to find the elements with correct namespaces. Of course you can also specify the 
 namespace context for each receive action individually.       
         
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .namespace("t", "http://citrusframework.org/samples/todolist")
-        .validate("/t:todo/t:id", "${todoId}")
-        .validate("/t:todo/t:title", "${todoName}")
-        .validate("/t:todo/t:description", "${todoDescription}");
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body>
+      <http:validate>
+        <http:xpath expression="/t:todo/t:id" value="${todoId}"/>
+        <http:xpath expression="/t:todo/t:title" value="${todoName}"/>
+        <http:xpath expression="/t:todo/t:description" value="${todoDescription}"/>
+        <http:xpath expression="/t:todo/t:done" value="false"/>
+        <http:namespace prefix="t" value="http://citrusframework.org/samples/todolist"/>
+      </http:validate>
+    </http:body>
+</http:receive-response>
+```
                 
 Run
 ---------

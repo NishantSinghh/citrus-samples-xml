@@ -12,44 +12,53 @@ See the [reference guide][4] database chapter for details.
 
 The database source is configured as Spring datasource in the application context ***citrus-context.xml***.
     
-    <bean id="todoListDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-      <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
-      <property name="url" value="jdbc:hsqldb:hsql://localhost/testdb"/>
-      <property name="username" value="sa"/>
-      <property name="password" value=""/>
-      <property name="initialSize" value="1"/>
-      <property name="maxActive" value="5"/>
-      <property name="maxIdle" value="2"/>
-    </bean>
+```xml
+<bean id="todoListDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+  <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+  <property name="url" value="jdbc:hsqldb:hsql://localhost/testdb"/>
+  <property name="username" value="sa"/>
+  <property name="password" value=""/>
+  <property name="initialSize" value="1"/>
+  <property name="maxActive" value="5"/>
+  <property name="maxIdle" value="2"/>
+</bean>
+```
     
 As you can see we are using a H2 in memory database here.    
 
 Before the test suite is started we create the relational database tables required.
 
-    <citrus:before-suite id="createDatabase">
-      <citrus:actions>
-        <citrus-test:sql datasource="todoListDataSource">
-          <citrus-test:statement>CREATE TABLE todo_entries (id VARCHAR(50), title VARCHAR(255), description VARCHAR(255))</citrus-test:statement>
-        </citrus-test:sql>
-      </citrus:actions>
-    </citrus:before-suite>
+```xml
+<citrus:before-suite id="createDatabase">
+  <citrus:actions>
+    <citrus-test:sql datasource="todoListDataSource">
+      <citrus-test:statement>CREATE TABLE todo_entries (id VARCHAR(50), title VARCHAR(255), description VARCHAR(255))</citrus-test:statement>
+    </citrus-test:sql>
+  </citrus:actions>
+</citrus:before-suite>
+```
 
 After the test we delete all test data again.
 
-    <citrus:after-suite id="cleanUpDatabase">
-      <citrus:actions>
-        <citrus-test:sql datasource="todoListDataSource">
-          <citrus-test:statement>DELETE FROM todo_entries</citrus-test:statement>
-        </citrus-test:sql>
-      </citrus:actions>
-    </citrus:after-suite>
+```xml
+<citrus:after-suite id="cleanUpDatabase">
+  <citrus:actions>
+    <citrus-test:sql datasource="todoListDataSource">
+      <citrus-test:statement>DELETE FROM todo_entries</citrus-test:statement>
+    </citrus-test:sql>
+  </citrus:actions>
+</citrus:after-suite>
+```
 
 In the test case we can reference the datasource in order to access the stored data and
 verify the result sets.
 
-    query(todoDataSource)
-        .statement("select count(*) as cnt from todo_entries where title = '${todoName}'")
-        .validate("cnt", "1");
+```xml
+<sql datasource="todoDataSource">
+    <statement>select count(*) as cnt from todo_entries where title = '${todoName}'</statement>
+    <validate column="cnt" value="0"/>
+</sql>
+```
 
 Run
 ---------

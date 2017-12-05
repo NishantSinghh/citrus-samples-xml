@@ -14,17 +14,25 @@ XHTML so XPath expressions can be evaluated accordingly.
 The sample tests show how to use this feature. First we define a global namespace for XHTML in
 configuration.
 
-    <citrus:namespace-context>
-      <citrus:namespace prefix="xh" uri="http://www.w3.org/1999/xhtml"/>
-    </citrus:namespace-context>
+```xml
+<citrus:namespace-context>
+  <citrus:namespace prefix="xh" uri="http://www.w3.org/1999/xhtml"/>
+</citrus:namespace-context>
+```
     
 Now we can use the XHTML validation feature in the Citrus test.
     
-    http()
-        .client(todoClient)
-        .response(HttpStatus.OK)
-        .messageType(MessageType.XHTML)
-        .xpath("(//xh:li[@class='list-group-item']/xh:span)[last()]", "${todoName}");
+```xml
+<http:receive-response client="todoClient">
+    <http:headers status="200" reason-phrase="OK"/>
+    <http:body type="xhtml">
+      <http:validate>
+        <http:xpath expression="//xh:h1" value="TODO list"/>
+        <http:xpath expression="(//xh:li[@class='list-group-item']/xh:span)[last()]" value="${todoName}"/>
+      </http:validate>
+    </http:body>
+</http:receive-response>
+```
         
 In a Http client response we can set the message type to XHTML. Citrus automatically converts the HTML response to
 XHTML so we can use XPath to validation the HTML content.

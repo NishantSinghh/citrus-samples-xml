@@ -12,38 +12,63 @@ server endpoint.
 
 In this sample we use dynamic endpoint uri instead.
     
-    http()
-        .client("http://localhost:8080")
-        .send()
-        .post("/todolist")
-        .messageType(MessageType.JSON)
-        .contentType("application/json")
-        .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+```xml
+<http:send-request uri="http://localhost:8080">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/json"/>
+      <http:body type="json">
+        <http:data>
+          <![CDATA[
+            { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+          ]]>
+        </http:data>
+      </http:body>
+    </http:POST>
+</http:send-request>
+```
         
 As you can see the send test action defines the Http request uri as endpoint. Citrus will automatically create a Http client
 component out of this endpoint uri. Also you can use this approach when receiving the response:
 
-    http()
-        .client("http://localhost:8080")
-        .receive()
-        .response(HttpStatus.OK)
-        .messageType(MessageType.JSON)
-        .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+```xml
+<http:receive-response uri="http://localhost:8080">
+    <http:headers status="200"/>
+    <http:body type="json">
+      <http:data>
+        <![CDATA[
+          { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+        ]]>
+      </http:data>
+    </http:body>
+</http:receive-response>
+```
 
 The endpoint uri can hold any Citrus endpoint type and is also capable of handling endpoint properties. Let us use that in an
 JMS dynamic endpoint.
 
-    send("jms:queue:jms.todo.inbound?connectionFactory=activeMqConnectionFactory")
-        .header("_type", "com.consol.citrus.samples.todolist.model.TodoEntry")
-        .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");    
+```xml
+<send endpoint="jms:queue:jms.todo.inbound?connectionFactory=activeMqConnectionFactory">
+    <message type="json">
+      <data>
+        <![CDATA[
+          { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+        ]]>
+      </data>
+    </message>
+    <header>
+      <element name="_type" value="com.consol.citrus.samples.todolist.model.TodoEntry"/>
+    </header>
+</send>    
+```
         
 The JMS endpoint uri defines the queue name and a connection factory as uri parameter. This connection factory is defined 
 as Spring bean in the configuration.
 
-    @Bean
-    public ConnectionFactory activeMqConnectionFactory() {
-        return new ActiveMQConnectionFactory("tcp://localhost:61616");
-    }
+```xml
+<bean id="activeMqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+    <property name="brokerURL" value="tcp://localhost:61616"/>
+</bean>
+```
         
 This is how to use dynamic endpoint components in Citrus.
                 

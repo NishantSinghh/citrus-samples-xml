@@ -8,6 +8,9 @@ The Citrus samples applications try to demonstrate how Citrus works in
 different integration test scenarios. The projects are executable with Maven
 and should give you a detailed picture how Citrus testing works.
 
+This repository uses the XML DSL and configuration in Citrus. In case you are a Java developer you can also use the 
+Java DSL and configuration notation. The samples using Java can be found in [samples-java][5].
+
 Overview
 ---------
 

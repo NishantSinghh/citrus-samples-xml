@@ -226,76 +226,84 @@ we can add a Citrus Kubernetes client to access the Kubernetes API within a test
 
 The client also uses the Kubernetes internal host and port for Kubernetes exposed services. With this client we can access the running pods and services from within a Citrus test:
 
-```java
-@Autowired
-private KubernetesClient k8sClient;
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<spring:beans xmlns="http://www.citrusframework.org/schema/testcase"
+              xmlns:spring="http://www.springframework.org/schema/beans"
+              xmlns:http="http://www.citrusframework.org/schema/http/testcase"
+              xmlns:k8s="http://www.citrusframework.org/schema/kubernetes/testcase"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                                  http://www.citrusframework.org/schema/testcase http://www.citrusframework.org/schema/testcase/citrus-testcase.xsd
+                                  http://www.citrusframework.org/schema/http/testcase http://www.citrusframework.org/schema/http/testcase/citrus-http-testcase.xsd
+                                  http://www.citrusframework.org/schema/kubernetes/testcase http://www.citrusframework.org/schema/kubernetes/testcase/citrus-kubernetes-testcase.xsd">
 
-@Test
-@CitrusTest
-public void testDeploymentState() {
-    kubernetes()
-        .client(k8sClient)
-        .pods()
-        .list()
-        .label("app=todo")
-        .validate("$..status.phase", "Running")
-        .validate((pods, context) -> {
-            Assert.assertFalse(CollectionUtils.isEmpty(pods.getResult().getItems()));
-        });
+  <testcase name="TodoList_Deployment_IT">
+    <actions>
+      <k8s:list-pods client="k8sClient" namespace="default" label="app=todo">
+        <k8s:validate>
+          <k8s:element path="$..status.phase" value="Running"/>
+          <k8s:element path="$..items.size()" value="@assertThat(greaterThan(0))@"/>
+        </k8s:validate>
+      </k8s:list-pods>
 
-    kubernetes()
-        .client(k8sClient)
-        .services()
-        .get("citrus-sample-todo-service")
-        .validate((service, context) -> {
-            Assert.assertNotNull(service.getResult());
-        });
-}
+      <k8s:get-service client="k8sClient" namespace="default" name="citrus-sample-todo-service"/>
+    </actions>
+  </testcase>
+</spring:beans>
 ```
 
 As you can see in the sample above we are able to test the deployment state of the todo-list applicaiton within Kubernetes. The test verifies that the pod is running and that
 the service is set up correctly. Now we can access the todo-list REST API in another test:
 
-```java
-@Autowired
-private HttpClient todoClient;
+```xml
+<testcase name="TodoList_Service_IT">
+    <variables>
+      <variable name="todoId" value="citrus:randomUUID()"/>
+      <variable name="todoName" value="citrus:concat('todo_', citrus:randomNumber(4))"/>
+      <variable name="todoDescription" value="Description: ${todoName}"/>
+      <variable name="done" value="false"/>
+    </variables>
 
-@Test
-@CitrusTest
-public void testTodoService() {
-    variable("todoId", "citrus:randomUUID()");
-    variable("todoName", "citrus:concat('todo_', citrus:randomNumber(4))");
-    variable("todoDescription", "Description: ${todoName}");
-    variable("done", "false");
+    <actions>
+      <http:send-request client="todoClient">
+        <http:POST path="/todolist">
+          <http:headers content-type="application/json"/>
+          <http:body type="json">
+            <http:data>
+              <![CDATA[
+                { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+              ]]>
+            </http:data>
+          </http:body>
+        </http:POST>
+      </http:send-request>
 
-    http()
-        .client(todoClient)
-        .send()
-        .post("/todolist")
-        .messageType(MessageType.JSON)
-        .contentType("application/json")
-        .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
+      <http:receive-response client="todoClient">
+        <http:headers status="200"/>
+        <http:body type="plaintext">
+          <http:data>${todoId}</http:data>
+        </http:body>
+      </http:receive-response>
 
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .messageType(MessageType.PLAINTEXT)
-        .payload("${todoId}");
+      <http:send-request client="todoClient">
+        <http:GET path="/todo/${todoId}">
+          <http:headers accept="application/json"/>
+        </http:GET>
+      </http:send-request>
 
-    http()
-        .client(todoClient)
-        .send()
-        .get("/todo/${todoId}")
-        .accept("application/json");
-
-    http()
-        .client(todoClient)
-        .receive()
-        .response(HttpStatus.OK)
-        .messageType(MessageType.JSON)
-        .payload("{ \"id\": \"${todoId}\", \"title\": \"${todoName}\", \"description\": \"${todoDescription}\", \"done\": ${done}}");
-}
+      <http:receive-response client="todoClient">
+        <http:headers status="200"/>
+        <http:body type="json">
+          <http:data>
+            <![CDATA[
+              { "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}
+            ]]>
+          </http:data>
+        </http:body>
+      </http:receive-response>
+    </actions>
+</testcase>
 ```
 
 With these integration tests we make sure to access the services and pods as every other pod running in Kubernetes would do. These are in-container tests
@@ -303,12 +311,12 @@ that consume services just like other clients would do in production. On top of 
 
 The test is able to check the Kubernetes deployment state. We can even manipulate the Kubernetes resources at test runtime:
 
-```java
-kubernetes()
-    .pods()
-    .delete("${todoPod}")
-    .namespace("default")
-    .validate((result, context) -> Assert.assertTrue(result.getResult().getSuccess()))
+```xml
+<k8s:delete-pod client="k8sClient" namespace="default" name="${todoPod}">
+  <k8s:validate>
+    <k8s:element path="$.result.success" value="true"/>
+  </k8s:validate>
+</k8s:delete-pod>
 ```
 
 The listing above deletes the todo-list pod. In that case the default Kubernetes replica set may just automatically start another pod so the todo-list application is kept running.
