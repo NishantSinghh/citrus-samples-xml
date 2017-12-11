@@ -1,6 +1,6 @@
 {
-  "projectHome" : "/Users/christoph/Projekte/Citrus/citrus-samples-xml/sample-http",
-  "name" : "citrus-sample-http",
+  "projectHome" : "/Users/christoph/Projekte/Citrus/citrus-samples-xml/sample-incident",
+  "name" : "citrus-sample-incident",
   "description" : "",
   "version" : "2.7.3-SNAPSHOT",
   "settings" : {

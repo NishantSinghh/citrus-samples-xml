@@ -28,7 +28,7 @@ in the Citrus test with some annotation magic.
     
 ```java
 @Test(dataProvider = "todoDataProvider")
-@CitrusTest
+@CitrusXmlTest(name = "TodoList_DataProvider_IT")
 @CitrusParameters( { "todoName", "todoDescription", "done" })
 public void testProvider(String todoName, String todoDescription, boolean done) {
 }

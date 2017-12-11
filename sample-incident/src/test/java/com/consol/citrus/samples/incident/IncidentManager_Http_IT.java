@@ -1,6 +1,5 @@
 package com.consol.citrus.samples.incident;
 
-import com.consol.citrus.annotations.CitrusTest;
 import com.consol.citrus.annotations.CitrusXmlTest;
 import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
@@ -20,7 +19,7 @@ public class IncidentManager_Http_IT extends AbstractTestNGCitrusTest {
     public void testIncidentManager_Http_FieldForceError_2() {
     }
 
-    @CitrusTest(name = "IncidentManager_Http_SchemaInvalid_IT")
+    @CitrusXmlTest(name = "IncidentManager_Http_SchemaInvalid_IT")
     public void testIncidentManager_Http_SchemaInvalid() {}
 
 }

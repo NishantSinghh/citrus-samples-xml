@@ -16,7 +16,6 @@
 
 package com.consol.citrus.samples.incident;
 
-import com.consol.citrus.annotations.CitrusTest;
 import com.consol.citrus.annotations.CitrusXmlTest;
 import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
@@ -35,6 +34,6 @@ public class IncidentManager_Jms_IT extends AbstractTestNGCitrusTest {
     @CitrusXmlTest(name = "IncidentManager_Jms_Ok_2_IT")
     public void testIncidentManager_Jms_Ok_2() {}
 
-    @CitrusTest(name = "IncidentManager_Jms_SchemaInvalid_IT")
+    @CitrusXmlTest(name = "IncidentManager_Jms_SchemaInvalid_IT")
     public void testIncidentManager_Jms_SchemaInvalid() {}
 }

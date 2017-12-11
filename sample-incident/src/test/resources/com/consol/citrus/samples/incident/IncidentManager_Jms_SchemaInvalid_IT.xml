@@ -56,8 +56,8 @@
         <message>
           <payload>
             <SOAP-ENV:Fault xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
-              <SOAP-ENV:faultcode>@contains('Client')@</SOAP-ENV:faultcode>
-              <SOAP-ENV:faultstring>@startsWith('Unmarshalling Error')@</SOAP-ENV:faultstring>
+              <faultcode>@contains('Client')@</faultcode>
+              <faultstring>@startsWith('Unmarshalling Error')@</faultstring>
             </SOAP-ENV:Fault>
           </payload>
         </message>
