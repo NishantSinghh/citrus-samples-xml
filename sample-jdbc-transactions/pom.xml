@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>com.consol.citrus.samples</groupId>
-  <artifactId>citrus-sample-jdbc</artifactId>
-  <name>citrus-sample-jdbc</name>
+  <artifactId>citrus-sample-jdbc-transactions</artifactId>
+  <name>citrus-sample-jdbc-transactions</name>
   <version>2.7.4-SNAPSHOT</version>
 
   <properties>
@@ -88,6 +88,10 @@
             <systemProperty>
               <name>todo.persistence.type</name>
               <value>jdbc</value>
+            </systemProperty>
+            <systemProperty>
+              <name>todo.persistence.transactional</name>
+              <value>true</value>
             </systemProperty>
             <systemProperty>
               <name>todo.jdbc.driverClassName</name>

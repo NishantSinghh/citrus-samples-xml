@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 the original author or authors.
+ * Copyright 2006-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,20 @@ import com.consol.citrus.annotations.CitrusXmlTest;
 import com.consol.citrus.testng.AbstractTestNGCitrusTest;
 import org.testng.annotations.Test;
 
-/**
- * @author Christoph Deppisch
- */
 public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.IndexPage")
-    public void testIndexPage() {}
+    @CitrusXmlTest(name = "TodoListIT.StoredProcedureCall")
+    public void testStoredProcedureCall() {
+    }
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.AddTodoEntry")
-    public void testAddTodoEntry() {}
+    @CitrusXmlTest(name = "TodoListIT.StoredProcedureCallFailed")
+    public void testStoredProcedureCallFailed() {
+    }
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.Error")
-    public void testError() {}
-
+    @CitrusXmlTest(name = "TodoListIT.StoredProcedureCallNotFound")
+    public void testStoredProcedureNotFound() {
+    }
 }

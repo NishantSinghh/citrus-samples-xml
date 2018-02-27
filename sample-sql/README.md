@@ -1,4 +1,4 @@
-JDBC sample ![Logo][1]
+SQL sample ![Logo][1]
 ==============
 
 This sample uses JDBC database connection to verify stored data in SQL query results sets.
@@ -13,54 +13,51 @@ See the [reference guide][4] database chapter for details.
 The database source is configured as Spring datasource in the application context ***citrus-context.xml***.
     
 ```xml
-<bean id="todoDataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
-  <property name="driverClassName" value="com.consol.citrus.db.driver.JdbcDriver"/>
-  <property name="url" value="jdbc:citrus:http://localhost:3306/testdb"/>
+<bean id="todoListDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+  <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+  <property name="url" value="jdbc:hsqldb:hsql://localhost/testdb"/>
   <property name="username" value="sa"/>
   <property name="password" value=""/>
+  <property name="initialSize" value="1"/>
+  <property name="maxActive" value="5"/>
+  <property name="maxIdle" value="2"/>
 </bean>
 ```
     
-As you can see we are using a special Citrus JDBC driver here. This driver connects to the Citrus JDBC server mock.    
+As you can see we are using a H2 in memory database here.    
 
-In the test case we can verify any JDBC operation on the datasource without having to actually create the data in the database.
+Before the test suite is started we create the relational database tables required.
 
 ```xml
-  <receive endpoint="jdbcServer">
-    <message>
-      <payload>
-        <jdbc:operation>
-          <jdbc:execute>
-            <jdbc:statement>
-              <jdbc:sql>SELECT id, title, description FROM todo_entries</jdbc:sql>
-            </jdbc:statement>
-          </jdbc:execute>
-        </jdbc:operation>
-      </payload>
-    </message>
-  </receive>
+<citrus:before-suite id="createDatabase">
+  <citrus:actions>
+    <citrus-test:sql datasource="todoListDataSource">
+      <citrus-test:statement>CREATE TABLE todo_entries (id VARCHAR(50), title VARCHAR(255), description VARCHAR(255))</citrus-test:statement>
+    </citrus-test:sql>
+  </citrus:actions>
+</citrus:before-suite>
+```
 
-  <send endpoint="jdbcServer">
-    <message>
-      <payload>
-        <jdbc:operation-result>
-          <jdbc:success>true</jdbc:success>
-          <jdbc:data-set>
-            <![CDATA[
-              <dataset>
-                <row>
-                  <id>citrus:randomUUID()</id>
-                  <title>${todoName}</title>
-                  <description>${todoDescription}</description>
-                  <done>false</done>
-                </row>
-              </dataset>
-            ]]>
-          </jdbc:data-set>
-        </jdbc:operation-result>
-      </payload>
-    </message>
-  </send>
+After the test we delete all test data again.
+
+```xml
+<citrus:after-suite id="cleanUpDatabase">
+  <citrus:actions>
+    <citrus-test:sql datasource="todoListDataSource">
+      <citrus-test:statement>DELETE FROM todo_entries</citrus-test:statement>
+    </citrus-test:sql>
+  </citrus:actions>
+</citrus:after-suite>
+```
+
+In the test case we can reference the datasource in order to access the stored data and
+verify the result sets.
+
+```xml
+<sql datasource="todoDataSource">
+    <statement>select count(*) as cnt from todo_entries where title = '${todoName}'</statement>
+    <validate column="cnt" value="0"/>
+</sql>
 ```
 
 Run

@@ -1,18 +1,25 @@
-JDBC sample ![Logo][1]
+JDBC transaction sample ![Logo][1]
 ==============
 
-This sample uses JDBC database connection to verify stored data in SQL query results sets.
+This sample uses a JDBC database connection to verify the transactional behavior of the application.
 
 Objectives
 ---------
 
 The [todo-list](../todo-app/README.md) sample application stores data to a relational database. This sample shows 
-the usage of database JDBC validation actions in Citrus. We are able to execute SQL statements on a database target. 
+the usage of database transaction validation actions in Citrus.
 See the [reference guide][4] database chapter for details.
 
-The database source is configured as Spring datasource in the application context ***citrus-context.xml***.
+The database server and its datasource are configured in the endpoint configuration context ***EndpointConfig.java***.
     
 ```xml
+<citrus-jdbc:server id="jdbcServer"
+                    port="3306"
+                    database-name="testdb"
+                    timeout="10000"
+                    auto-start="true"
+                    auto-transaction-handling="false"/>
+
 <bean id="todoDataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
   <property name="driverClassName" value="com.consol.citrus.db.driver.JdbcDriver"/>
   <property name="url" value="jdbc:citrus:http://localhost:3306/testdb"/>
@@ -21,46 +28,31 @@ The database source is configured as Spring datasource in the application contex
 </bean>
 ```
     
-As you can see we are using a special Citrus JDBC driver here. This driver connects to the Citrus JDBC server mock.    
+As you can see we are using a citrus database server here which is configured to validate transaction behavior
+by setting `auto-transaction-handling="false"`.    
 
-In the test case we can verify any JDBC operation on the datasource without having to actually create the data in the database.
+In the test case we can now verify the transactional behavior of our application if a client request hits our API. 
 
-```xml
-  <receive endpoint="jdbcServer">
-    <message>
-      <payload>
-        <jdbc:operation>
-          <jdbc:execute>
-            <jdbc:statement>
-              <jdbc:sql>SELECT id, title, description FROM todo_entries</jdbc:sql>
-            </jdbc:statement>
-          </jdbc:execute>
-        </jdbc:operation>
-      </payload>
-    </message>
-  </receive>
+```java
+http()
+    .client(todoClient)
+    .send()
+    .post("/todolist")
+    .fork(true)
+    .contentType("application/x-www-form-urlencoded")
+    .payload("title=${todoName}&description=${todoDescription}");
 
-  <send endpoint="jdbcServer">
-    <message>
-      <payload>
-        <jdbc:operation-result>
-          <jdbc:success>true</jdbc:success>
-          <jdbc:data-set>
-            <![CDATA[
-              <dataset>
-                <row>
-                  <id>citrus:randomUUID()</id>
-                  <title>${todoName}</title>
-                  <description>${todoDescription}</description>
-                  <done>false</done>
-                </row>
-              </dataset>
-            ]]>
-          </jdbc:data-set>
-        </jdbc:operation-result>
-      </payload>
-    </message>
-  </send>
+receive(jdbcServer)
+    .message(JdbcCommand.startTransaction());
+
+receive(jdbcServer)
+    .message(JdbcMessage.execute("@startsWith('INSERT INTO todo_entries (id, title, description, done) VALUES (?, ?, ?, ?)')@"));
+
+send(jdbcServer)
+        .message(JdbcMessage.result().rowsUpdated(1));
+
+receive(jdbcServer)
+    .message(JdbcCommand.commitTransaction());
 ```
 
 Run

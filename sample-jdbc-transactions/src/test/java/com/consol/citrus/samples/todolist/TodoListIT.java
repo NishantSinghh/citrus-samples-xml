@@ -17,24 +17,35 @@
 package com.consol.citrus.samples.todolist;
 
 import com.consol.citrus.annotations.CitrusXmlTest;
+import com.consol.citrus.jdbc.server.JdbcServer;
 import com.consol.citrus.testng.AbstractTestNGCitrusTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-/**
- * @author Christoph Deppisch
- */
 public class TodoListIT extends AbstractTestNGCitrusTest {
 
-    @Test
-    @CitrusXmlTest(name = "TodoListIT.IndexPage")
-    public void testIndexPage() {}
+    @Autowired
+    private JdbcServer jdbcServer;
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.AddTodoEntry")
-    public void testAddTodoEntry() {}
+    @CitrusXmlTest(name = "TodoListIT.TransactionHandling")
+    public void testTransaction() {
+    }
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.Error")
-    public void testError() {}
+    @CitrusXmlTest(name = "TodoListIT.TransactionRollback")
+    public void testRollback() {
+    }
 
+    @Test
+    @CitrusXmlTest(name = "TodoListIT.AutoTransactionHandling")
+    public void testAutoTransactionHandling() {
+        jdbcServer.getEndpointConfiguration().setAutoTransactionHandling(true);
+    }
+
+    @AfterMethod
+    public void resetTransactionState(){
+        jdbcServer.getEndpointConfiguration().setAutoTransactionHandling(false);
+    }
 }

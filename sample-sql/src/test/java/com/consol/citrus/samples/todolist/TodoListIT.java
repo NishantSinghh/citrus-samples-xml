@@ -26,15 +26,7 @@ import org.testng.annotations.Test;
 public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
-    @CitrusXmlTest(name = "TodoListIT.IndexPage")
-    public void testIndexPage() {}
-
-    @Test
-    @CitrusXmlTest(name = "TodoListIT.AddTodoEntry")
-    public void testAddTodoEntry() {}
-
-    @Test
-    @CitrusXmlTest(name = "TodoListIT.Error")
-    public void testError() {}
+    @CitrusXmlTest(name = "TodoListIT")
+    public void testJdbcConnectivity() {}
 
 }

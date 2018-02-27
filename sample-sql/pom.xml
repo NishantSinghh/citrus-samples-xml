@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
   
   <groupId>com.consol.citrus.samples</groupId>
-  <artifactId>citrus-sample-jdbc</artifactId>
-  <name>citrus-sample-jdbc</name>
+  <artifactId>citrus-sample-sql</artifactId>
+  <name>citrus-sample-sql</name>
   <version>2.7.4-SNAPSHOT</version>
 
   <properties>
@@ -14,7 +14,6 @@
     <slf4j.version>1.7.25</slf4j.version>
     <testng.version>6.11</testng.version>
     <citrus.version>2.7.4-SNAPSHOT</citrus.version>
-    <citrus.db.version>0.1-SNAPSHOT</citrus.db.version>
   </properties>
 
   <build>
@@ -68,13 +67,6 @@
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${jetty.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.consol.citrus</groupId>
-            <artifactId>citrus-db-driver</artifactId>
-            <version>${citrus.db.version}</version>
-          </dependency>
-        </dependencies>
         <configuration>
           <war>${settings.localRepository}/com/consol/citrus/samples/citrus-sample-todo/${project.version}/citrus-sample-todo-${project.version}.war</war>
           <httpConnector>
@@ -90,14 +82,6 @@
               <value>jdbc</value>
             </systemProperty>
             <systemProperty>
-              <name>todo.jdbc.driverClassName</name>
-              <value>com.consol.citrus.db.driver.JdbcDriver</value>
-            </systemProperty>
-            <systemProperty>
-              <name>todo.jdbc.url</name>
-              <value>jdbc:citrus:http://localhost:3306/testdb</value>
-            </systemProperty>
-            <systemProperty>
               <name>file.encoding</name>
               <value>UTF-8</value>
             </systemProperty>
@@ -108,6 +92,19 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.3.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <version>1.4</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -137,12 +134,6 @@
     <dependency>
       <groupId>com.consol.citrus</groupId>
       <artifactId>citrus-core</artifactId>
-      <version>${citrus.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.consol.citrus</groupId>
-      <artifactId>citrus-jdbc</artifactId>
       <version>${citrus.version}</version>
       <scope>test</scope>
     </dependency>

@@ -1,18 +1,25 @@
-JDBC sample ![Logo][1]
+JDBC callable statements sample ![Logo][1]
 ==============
 
-This sample uses JDBC database connection to verify stored data in SQL query results sets.
+This sample uses a JDBC database connection to verify the management of callable statements by the todo application.
 
 Objectives
 ---------
 
 The [todo-list](../todo-app/README.md) sample application stores data to a relational database. This sample shows 
-the usage of database JDBC validation actions in Citrus. We are able to execute SQL statements on a database target. 
+the usage of callable statements validation actions in Citrus.
 See the [reference guide][4] database chapter for details.
 
-The database source is configured as Spring datasource in the application context ***citrus-context.xml***.
+The database server and its datasource are configured in the endpoint configuration context ***EndpointConfig.java***.
     
 ```xml
+<citrus-jdbc:server id="jdbcServer"
+                    port="3306"
+                    database-name="testdb"
+                    timeout="10000"
+                    auto-start="true"
+                    auto-create-statement="false"/>
+
 <bean id="todoDataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource">
   <property name="driverClassName" value="com.consol.citrus.db.driver.JdbcDriver"/>
   <property name="url" value="jdbc:citrus:http://localhost:3306/testdb"/>
@@ -21,18 +28,45 @@ The database source is configured as Spring datasource in the application contex
 </bean>
 ```
     
-As you can see we are using a special Citrus JDBC driver here. This driver connects to the Citrus JDBC server mock.    
+As you can see we are using a citrus database server here which is configured to validate all statement related actions
+by setting `auto-create-statement="false"`.    
 
-In the test case we can verify any JDBC operation on the datasource without having to actually create the data in the database.
+In the test case we can now verify the callable statement behavior of our application if a client request hits our API. 
 
 ```xml
+  <http:send-request client="todoClient" fork="true">
+    <http:GET path="/api/todolist/1"/>
+  </http:send-request>
+
+  <receive endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation>
+          <jdbc:create-callable-statement>
+            <jdbc:sql>{CALL limitedToDoList(?)}</jdbc:sql>
+          </jdbc:create-callable-statement>
+        </jdbc:operation>
+      </payload>
+    </message>
+  </receive>
+
+  <send endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation-result>
+          <jdbc:success>true</jdbc:success>
+        </jdbc:operation-result>
+      </payload>
+    </message>
+  </send>
+
   <receive endpoint="jdbcServer">
     <message>
       <payload>
         <jdbc:operation>
           <jdbc:execute>
             <jdbc:statement>
-              <jdbc:sql>SELECT id, title, description FROM todo_entries</jdbc:sql>
+              <jdbc:sql>{CALL limitedToDoList(?)} - (1)</jdbc:sql>
             </jdbc:statement>
           </jdbc:execute>
         </jdbc:operation>
@@ -49,7 +83,7 @@ In the test case we can verify any JDBC operation on the datasource without havi
             <![CDATA[
               <dataset>
                 <row>
-                  <id>citrus:randomUUID()</id>
+                  <id>${todoId}</id>
                   <title>${todoName}</title>
                   <description>${todoDescription}</description>
                   <done>false</done>
