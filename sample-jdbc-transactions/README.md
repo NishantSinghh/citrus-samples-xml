@@ -33,26 +33,79 @@ by setting `auto-transaction-handling="false"`.
 
 In the test case we can now verify the transactional behavior of our application if a client request hits our API. 
 
-```java
-http()
-    .client(todoClient)
-    .send()
-    .post("/todolist")
-    .fork(true)
-    .contentType("application/x-www-form-urlencoded")
-    .payload("title=${todoName}&description=${todoDescription}");
+```xml
+  <http:send-request client="todoClient" fork="true">
+    <http:POST path="/todolist">
+      <http:headers content-type="application/x-www-form-urlencoded"/>
+      <http:body>
+        <http:data>title=${todoName}&amp;description=${todoDescription}</http:data>
+      </http:body>
+    </http:POST>
+  </http:send-request>
 
-receive(jdbcServer)
-    .message(JdbcCommand.startTransaction());
+  <receive endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation>
+          <jdbc:transaction-started/>
+        </jdbc:operation>
+      </payload>
+    </message>
+  </receive>
 
-receive(jdbcServer)
-    .message(JdbcMessage.execute("@startsWith('INSERT INTO todo_entries (id, title, description, done) VALUES (?, ?, ?, ?)')@"));
+  <send endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation-result>
+          <jdbc:success>true</jdbc:success>
+        </jdbc:operation-result>
+      </payload>
+    </message>
+  </send>
 
-send(jdbcServer)
-        .message(JdbcMessage.result().rowsUpdated(1));
+  <receive endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation>
+          <jdbc:execute>
+            <jdbc:statement>
+              <jdbc:sql>@startsWith('INSERT INTO todo_entries (id, title, description, done) VALUES (?, ?, ?, ?)')@</jdbc:sql>
+            </jdbc:statement>
+          </jdbc:execute>
+        </jdbc:operation>
+      </payload>
+    </message>
+  </receive>
 
-receive(jdbcServer)
-    .message(JdbcCommand.commitTransaction());
+  <send endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation-result affected-rows="1">
+          <jdbc:success>true</jdbc:success>
+        </jdbc:operation-result>
+      </payload>
+    </message>
+  </send>
+
+  <receive endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation>
+          <jdbc:transaction-committed/>
+        </jdbc:operation>
+      </payload>
+    </message>
+  </receive>
+
+  <send endpoint="jdbcServer">
+    <message>
+      <payload>
+        <jdbc:operation-result>
+          <jdbc:success>true</jdbc:success>
+        </jdbc:operation-result>
+      </payload>
+    </message>
+  </send>
 ```
 
 Run
