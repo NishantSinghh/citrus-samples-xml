@@ -25,7 +25,7 @@
 
     <actions>
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/xml"/>
           <http:body>
             <http:payload>
@@ -47,7 +47,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers accept="application/xml"/>
         </http:GET>
       </http:send-request>

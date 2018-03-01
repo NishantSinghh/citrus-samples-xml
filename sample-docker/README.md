@@ -251,7 +251,7 @@ add new todo items.
 
 ```xml
 <http:send-request client="todoClient">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/json"/>
       <http:body type="json">
         <http:data>{ "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}</http:data>

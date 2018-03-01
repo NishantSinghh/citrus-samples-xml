@@ -23,11 +23,11 @@
 
   <citrus-test:template name="clearTodoList">
     <citrus-http-test:send-request client="todoClient">
-      <citrus-http-test:DELETE path="/todolist"/>
+      <citrus-http-test:DELETE path="/api/todolist"/>
     </citrus-http-test:send-request>
 
     <citrus-http-test:receive-response client="todoClient">
-      <citrus-http-test:headers status="302" reason-phrase="FOUND"/>
+      <citrus-http-test:headers status="200" reason-phrase="OK"/>
     </citrus-http-test:receive-response>
   </citrus-test:template>
 </beans>

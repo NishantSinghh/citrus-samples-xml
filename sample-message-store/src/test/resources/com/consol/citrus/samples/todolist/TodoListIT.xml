@@ -18,7 +18,7 @@
 
     <actions>
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body name="todoRequest" type="json">
             <http:data>
@@ -42,7 +42,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todo/citrus:jsonPath(citrus:message(todoRequest.payload()), '$.id')">
+        <http:GET path="/api/todo/citrus:jsonPath(citrus:message(todoRequest.payload()), '$.id')">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>

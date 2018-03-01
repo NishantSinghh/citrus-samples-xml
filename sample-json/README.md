@@ -14,7 +14,7 @@ We can use Json as message payloads directly in the test cases.
     
 ```xml
 <http:send-request client="todoClient">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/json"/>
       <http:body type="json">
         <http:data>

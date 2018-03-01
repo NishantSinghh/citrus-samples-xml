@@ -24,7 +24,7 @@
 
     <actions>
       <http:send-request uri="http://localhost:8080">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body type="json">
             <http:data>
@@ -44,7 +44,7 @@
       </http:receive-response>
 
       <http:send-request uri="http://localhost:8080">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>

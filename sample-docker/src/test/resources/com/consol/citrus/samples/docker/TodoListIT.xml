@@ -25,7 +25,7 @@
 
     <actions>
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body type="json">
             <http:data>{ "id": "${todoId}", "title": "${todoName}", "description": "${todoDescription}", "done": ${done}}</http:data>
@@ -41,7 +41,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers content-type="application/json"/>
         </http:GET>
       </http:send-request>

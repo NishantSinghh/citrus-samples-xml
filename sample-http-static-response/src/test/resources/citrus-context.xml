@@ -34,8 +34,8 @@
     <bean id="mappingStrategy" class="com.consol.citrus.endpoint.adapter.mapping.SimpleMappingStrategy">
         <property name="adapterMappings">
             <map>
-                <entry key="/todo" value-ref="todoResponseAdapter"/>
-                <entry key="/todolist" value-ref="todoListResponseAdapter"/>
+                <entry key="/api/todo" value-ref="todoResponseAdapter"/>
+                <entry key="/api/todolist" value-ref="todoListResponseAdapter"/>
             </map>
         </property>
     </bean>

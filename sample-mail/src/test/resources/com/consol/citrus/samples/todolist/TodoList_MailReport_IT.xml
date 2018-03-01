@@ -27,7 +27,7 @@
       <call-template name="clearTodoList"/>
 
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body type="json">
             <http:data>
@@ -47,7 +47,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/reporting/mail"/>
+        <http:GET path="/api/reporting/mail"/>
       </http:send-request>
 
       <echo>

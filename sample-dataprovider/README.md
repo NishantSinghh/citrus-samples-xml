@@ -39,7 +39,7 @@ In the XML test case definition we can use the test variables coming from the da
 ```xml
 <actions>
   <http:send-request client="todoClient">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/json"/>
       <http:body type="json">
         <http:data>

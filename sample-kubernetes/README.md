@@ -267,7 +267,7 @@ the service is set up correctly. Now we can access the todo-list REST API in ano
 
     <actions>
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body type="json">
             <http:data>
@@ -287,7 +287,7 @@ the service is set up correctly. Now we can access the todo-list REST API in ano
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>

@@ -27,7 +27,7 @@ public class TodoListIT extends AbstractTestNGCitrusTest {
 
     @Test
     @CitrusXmlTest(name = "TodoListIT")
-    void testTodoList() {
+    public void testTodoList() {
     }
 
     @Test

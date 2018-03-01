@@ -15,7 +15,7 @@ You can access the message store at any time in the test case using message stor
 
 ```xml
 <http:send-request client="todoClient">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/json"/>
       <http:body name="todoRequest" type="json">
         <http:data>

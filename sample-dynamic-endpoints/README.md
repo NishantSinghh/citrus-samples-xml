@@ -14,7 +14,7 @@ In this sample we use dynamic endpoint uri instead.
     
 ```xml
 <http:send-request uri="http://localhost:8080">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/json"/>
       <http:body type="json">
         <http:data>

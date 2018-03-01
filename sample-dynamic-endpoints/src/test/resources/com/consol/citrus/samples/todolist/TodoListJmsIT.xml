@@ -40,7 +40,7 @@
       <sleep milliseconds="500"/>
 
       <http:send-request uri="http://localhost:8080">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>

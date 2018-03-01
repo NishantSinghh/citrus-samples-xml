@@ -22,7 +22,7 @@
 
     <actions>
       <http:send-request client="todoClient">
-        <http:POST path="/todolist">
+        <http:POST path="/api/todolist">
           <http:headers content-type="application/json"/>
           <http:body type="json" data-dictionary="outboundDictionary">
             <http:resource file="templates/todo.json"/>
@@ -38,7 +38,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todo/${todoId}">
+        <http:GET path="/api/todo/${todoId}">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>

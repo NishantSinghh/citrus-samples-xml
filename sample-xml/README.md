@@ -25,7 +25,7 @@ That is all for configuration, now we can use XML as message payload in the test
     
 ```xml
 <http:send-request client="todoClient">
-    <http:POST path="/todolist">
+    <http:POST path="/api/todolist">
       <http:headers content-type="application/xml"/>
       <http:body>
         <http:payload>

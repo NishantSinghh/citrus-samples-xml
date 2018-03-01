@@ -40,7 +40,7 @@ Also we can use Hamcrest matcher as condition evaluation when using iterable con
     </create-variables>
 
     <http:send-request uri="http://localhost:8080">
-      <http:POST path="/todolist">
+      <http:POST path="/api/todolist">
         <http:headers content-type="application/json"/>
         <http:body type="json">
           <http:data>

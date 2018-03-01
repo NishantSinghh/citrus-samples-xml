@@ -18,7 +18,7 @@
 
     <actions>
       <http:send-request client="todoClient">
-        <http:GET path="/todo">
+        <http:GET path="/api/todo">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>
@@ -35,7 +35,7 @@
       </http:receive-response>
 
       <http:send-request client="todoClient">
-        <http:GET path="/todolist">
+        <http:GET path="/api/todolist">
           <http:headers accept="application/json"/>
         </http:GET>
       </http:send-request>
