@@ -2,10 +2,10 @@
   "projectHome" : "/Users/christoph/Projekte/Citrus/citrus-samples-xml/sample-incident",
   "name" : "citrus-sample-incident",
   "description" : "",
-  "version" : "2.7.4",
+  "version" : "2.7.5-SNAPSHOT",
   "settings" : {
     "basePackage" : "com.consol.citrus.samples",
-    "citrusVersion" : "2.7.4",
+    "citrusVersion" : "2.7.5-SNAPSHOT",
     "springApplicationContext" : "classpath*:citrus-context.xml",
     "springJavaConfig" : "com.consol.citrus.CitrusEndpointConfig",
     "javaSrcDirectory" : "src/test/java/",
