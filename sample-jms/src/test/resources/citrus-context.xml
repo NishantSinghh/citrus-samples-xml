@@ -21,6 +21,10 @@
     <citrus-jms:endpoint id="todoJmsEndpoint"
                          destination-name="jms.todo.inbound"/>
 
+    <citrus-jms:sync-endpoint id="todoJmsSyncEndpoint"
+                              destination-name="jms.todo.inbound.sync"
+                              reply-destination-name="jms.todo.inbound.sync.reply"/>
+
     <!-- JMS connection factory and message broker -->
     <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
       <property name="brokerURL" value="tcp://localhost:61616" />
