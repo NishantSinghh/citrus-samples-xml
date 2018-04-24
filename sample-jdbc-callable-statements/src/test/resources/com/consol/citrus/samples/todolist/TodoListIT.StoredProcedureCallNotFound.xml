@@ -7,7 +7,7 @@
               xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                                   http://www.citrusframework.org/schema/testcase http://www.citrusframework.org/schema/testcase/citrus-testcase.xsd
                                   http://www.citrusframework.org/schema/http/testcase http://www.citrusframework.org/schema/http/testcase/citrus-http-testcase.xsd
-                                  http://www.citrusframework.org/schema/jdbc/message http://www.citrusframework.org/schema/http/testcase/citrus-jdbc-message.xsd">
+                                  http://www.citrusframework.org/schema/jdbc/message http://www.citrusframework.org/schema/jdbc/message/citrus-jdbc-message.xsd">
 
   <testcase name="TodoListIT.StoredProcedureCallNotFound">
     <meta-info>
